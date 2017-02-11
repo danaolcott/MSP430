@@ -97,7 +97,7 @@ void main(void)
 	while(1)
 	{
 		LED_RED_TOGGLE();
-		delay_ms(10);
+		delay_ms(200);
 
 		//test the SPI functions
 		SPI_Write(0xAA);

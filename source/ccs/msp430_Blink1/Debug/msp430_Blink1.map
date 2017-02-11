@@ -1,7 +1,7 @@
 ******************************************************************************
                   MSP430 Linker PC v4.4.5                      
 ******************************************************************************
->> Linked Sun Oct 16 10:15:47 2016
+>> Linked Fri Feb 10 20:20:06 2017
 
 OUTPUT FILE NAME:   <msp430_Blink1.out>
 ENTRY POINT SYMBOL: "_c_int00_noargs_noexit"  address: 0000c43a
@@ -14,7 +14,7 @@ MEMORY CONFIGURATION
   SFR                   00000000   00000010  00000000  00000010  RWIX
   PERIPHERALS_8BIT      00000010   000000f0  00000000  000000f0  RWIX
   PERIPHERALS_16BIT     00000100   00000100  00000000  00000100  RWIX
-  RAM                   00000200   00000200  000000d7  00000129  RWIX
+  RAM                   00000200   00000200  00000127  000000d9  RWIX
   INFOD                 00001000   00000040  00000000  00000040  RWIX
   INFOC                 00001040   00000040  00000000  00000040  RWIX
   INFOB                 00001080   00000040  00000000  00000040  RWIX
@@ -55,9 +55,9 @@ section   page    origin      length       input sections
 .TI.persistent 
 *          0    00000236    00000000     UNINITIALIZED
 
-.stack     0    00000360    000000a0     UNINITIALIZED
-                  00000360    00000002     rts430_eabi.lib : boot.obj (.stack)
-                  00000362    0000009e     --HOLE--
+.stack     0    00000310    000000f0     UNINITIALIZED
+                  00000310    00000002     rts430_eabi.lib : boot.obj (.stack)
+                  00000312    000000ee     --HOLE--
 
 .text      0    0000c000    00000530     
                   0000c000    000000e0     main.obj (.text:ProcessCommand)
@@ -293,7 +293,7 @@ address   name
 0000c152  USCI0RX_ISR             
 00000120  WDTCTL                  
 00000400  __STACK_END             
-000000a0  __STACK_SIZE            
+000000f0  __STACK_SIZE            
 0000c656  __TI_CINIT_Base         
 0000c65e  __TI_CINIT_Limit        
 0000c64c  __TI_Handler_Table_Base 
@@ -329,7 +329,7 @@ ffffffff  __c_args__
 0000c21c  _auto_init              
 0000c43a  _c_int00_noargs_noexit  
 0000fffe  _reset_vector           
-00000360  _stack                  
+00000310  _stack                  
 0000c528  _system_pre_init        
 0000c52c  abort                   
 ffffffff  binit                   
@@ -403,7 +403,7 @@ address   name
 0000006d  UCB0STAT                
 0000006e  UCB0RXBUF               
 0000006f  UCB0TXBUF               
-000000a0  __STACK_SIZE            
+000000f0  __STACK_SIZE            
 00000118  UCB0I2COA               
 0000011a  UCB0I2CSA               
 0000011e  TA1IV                   
@@ -433,7 +433,7 @@ address   name
 000001b4  ADC10MEM                
 000001bc  ADC10SA                 
 00000200  rxBuffer                
-00000360  _stack                  
+00000310  _stack                  
 00000400  __STACK_END             
 000010c0  TLV_CHECKSUM            
 000010da  TLV_ADC10_1_TAG         
