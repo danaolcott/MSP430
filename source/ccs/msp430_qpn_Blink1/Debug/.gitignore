@@ -1,0 +1,9 @@
+/bsp/
+/lcd/
+/makefile
+/objects/
+/objects.mk
+/qpn/
+/sources.mk
+/subdir_rules.mk
+/subdir_vars.mk

@@ -1,0 +1,648 @@
+******************************************************************************
+                  MSP430 Linker PC v4.4.5                      
+******************************************************************************
+>> Linked Fri Feb 10 23:15:08 2017
+
+OUTPUT FILE NAME:   <msp430_qpn_Blink1.out>
+ENTRY POINT SYMBOL: "_c_int00_noargs_noexit"  address: 0000ce30
+
+
+MEMORY CONFIGURATION
+
+         name            origin    length      used     unused   attr    fill
+----------------------  --------  ---------  --------  --------  ----  --------
+  SFR                   00000000   00000010  00000000  00000010  RWIX
+  PERIPHERALS_8BIT      00000010   000000f0  00000000  000000f0  RWIX
+  PERIPHERALS_16BIT     00000100   00000100  00000000  00000100  RWIX
+  RAM                   00000200   00000200  000000be  00000142  RWIX
+  INFOD                 00001000   00000040  00000000  00000040  RWIX
+  INFOC                 00001040   00000040  00000000  00000040  RWIX
+  INFOB                 00001080   00000040  00000000  00000040  RWIX
+  INFOA                 000010c0   00000040  00000000  00000040  RWIX
+  FLASH                 0000c000   00003fde  00000fac  00003032  RWIX
+  BSLSIGNATURE          0000ffde   00000002  00000002  00000000  RWIX  ffff 
+  INT00                 0000ffe0   00000002  00000002  00000000  RWIX
+  INT01                 0000ffe2   00000002  00000000  00000002  RWIX
+  INT02                 0000ffe4   00000002  00000002  00000000  RWIX
+  INT03                 0000ffe6   00000002  00000002  00000000  RWIX
+  INT04                 0000ffe8   00000002  00000000  00000002  RWIX
+  INT05                 0000ffea   00000002  00000002  00000000  RWIX
+  INT06                 0000ffec   00000002  00000002  00000000  RWIX
+  INT07                 0000ffee   00000002  00000002  00000000  RWIX
+  INT08                 0000fff0   00000002  00000002  00000000  RWIX
+  INT09                 0000fff2   00000002  00000002  00000000  RWIX
+  INT10                 0000fff4   00000002  00000002  00000000  RWIX
+  INT11                 0000fff6   00000002  00000002  00000000  RWIX
+  INT12                 0000fff8   00000002  00000002  00000000  RWIX
+  INT13                 0000fffa   00000002  00000002  00000000  RWIX
+  INT14                 0000fffc   00000002  00000002  00000000  RWIX
+  RESET                 0000fffe   00000002  00000002  00000000  RWIX
+
+
+SECTION ALLOCATION MAP
+
+ output                                  attributes/
+section   page    origin      length       input sections
+--------  ----  ----------  ----------   ----------------
+.bss       0    00000200    0000006e     UNINITIALIZED
+                  00000200    0000001e     (.common:l_blinkyQSto)
+                  0000021e    0000001e     (.common:l_buttonQSto)
+                  0000023c    00000018     (.common:AO_Blinky)
+                  00000254    00000018     (.common:AO_Button)
+                  0000026c    00000002     (.common:QF_readySet_)
+
+.stack     0    000003b0    00000050     UNINITIALIZED
+                  000003b0    00000002     rts430_eabi.lib : boot.obj (.stack)
+                  000003b2    0000004e     --HOLE--
+
+.text      0    0000c000    00000f56     
+                  0000c000    00000254     tft_lcd.obj (.text:LCD_init)
+                  0000c254    0000014a     qepn.obj (.text:QHsm_tran_)
+                  0000c39e    0000012c     qepn.obj (.text:QHsm_dispatch_)
+                  0000c4ca    0000010c     qfn.obj (.text:QF_run)
+                  0000c5d6    000000c2     qepn.obj (.text:QHsm_init_)
+                  0000c698    000000ae     qfn.obj (.text:QActive_postX_)
+                  0000c746    000000a8     qfn.obj (.text:QActive_postXISR_)
+                  0000c7ee    00000094     tft_lcd.obj (.text:SPIA_Write32)
+                  0000c882    0000008c     button.obj (.text:Button_Active)
+                  0000c90e    0000007e     tft_lcd.obj (.text:SPIA_Write24)
+                  0000c98c    0000007c     tft_lcd.obj (.text:LCD_Clear)
+                  0000ca08    0000006c     tft_lcd.obj (.text:SPIA_init)
+                  0000ca74    0000006a     tft_lcd.obj (.text:SPIA_Write16)
+                  0000cade    00000066     blinky.obj (.text:Blinky_on)
+                  0000cb44    00000060     blinky.obj (.text:Blinky_off)
+                  0000cba4    0000005c     qfn.obj (.text:QF_tickXISR)
+                  0000cc00    00000058     rts430_eabi.lib : autoinit.obj (.text:_auto_init)
+                  0000cc58    00000056     tft_lcd.obj (.text:SPIA_Write8)
+                  0000ccae    0000004c     rts430_eabi.lib : lsr16.obj (.text)
+                  0000ccfa    0000003e                     : lsl32.obj (.text:l_lsl_const)
+                  0000cd38    0000002e     bsp.obj (.text:BSP_init)
+                  0000cd66    0000002c     tft_lcd.obj (.text:SPIA_WriteCommand)
+                  0000cd92    0000002c     tft_lcd.obj (.text:SPIA_WriteData)
+                  0000cdbe    0000002c     rts430_eabi.lib : lsl16.obj (.text)
+                  0000cdea    0000002a     tft_lcd.obj (.text:rgb2bgr)
+                  0000ce14    0000001c     bsp.obj (.text:timerA_ISR)
+                  0000ce30    0000001a     rts430_eabi.lib : boot_special.obj (.text:_c_int00_noargs_noexit)
+                  0000ce4a    00000018     blinky.obj (.text:Blinky_ctor)
+                  0000ce62    00000016     tft_lcd.obj (.text:delay_us)
+                  0000ce78    00000014     blinky.obj (.text:Blinky_initial)
+                  0000ce8c    00000014     qfn.obj (.text:QActive_armX)
+                  0000cea0    00000014     rts430_eabi.lib : copy_zero_init.obj (.text:decompress:ZI:__TI_zero_init)
+                  0000ceb4    00000014                     : mult16.obj (.text)
+                  0000cec8    00000012     button.obj (.text:Button_ctor)
+                  0000ceda    00000012     qfn.obj (.text:QActive_ctor)
+                  0000ceec    00000012     qepn.obj (.text:QHsm_ctor)
+                  0000cefe    00000012     main.obj (.text:main)
+                  0000cf10    00000010     rts430_eabi.lib : epilog.obj (.text)
+                  0000cf20    0000000a     button.obj (.text:Button_initial)
+                  0000cf2a    00000008     bsp.obj (.text:QF_onStartup)
+                  0000cf32    00000008     bsp.obj (.text:nmi_ISR)
+                  0000cf3a    00000006     bsp.obj (.text:Q_onAssert)
+                  0000cf40    00000006     rts430_eabi.lib : isr_trap.obj (.text:_isr:__TI_ISR_TRAP)
+                  0000cf46    00000004     bsp.obj (.text:QF_onIdle)
+                  0000cf4a    00000004     qepn.obj (.text:QHsm_top)
+                  0000cf4e    00000004     rts430_eabi.lib : pre_init.obj (.text:_system_pre_init)
+                  0000cf52    00000004                     : exit.obj (.text:abort)
+
+.const     0    0000cf56    0000004c     
+                  0000cf56    00000012     main.obj (.const:QF_active)
+                  0000cf68    00000010     qfn.obj (.const:.string:QF_log2Lkup)
+                  0000cf78    00000009     qfn.obj (.const:.string:l_invPow2Lkup)
+                  0000cf81    00000001     --HOLE-- [fill = 0]
+                  0000cf82    00000009     qfn.obj (.const:.string:l_pow2Lkup)
+                  0000cf8b    00000001     --HOLE-- [fill = 0]
+                  0000cf8c    00000008     qfn.obj (.const)
+                  0000cf94    00000005     qepn.obj (.const:.string:Q_this_module_)
+                  0000cf99    00000001     --HOLE-- [fill = 0]
+                  0000cf9a    00000004     qfn.obj (.const:.string:Q_this_module_)
+                  0000cf9e    00000004     qepn.obj (.const)
+
+.cinit     0    0000cfa2    0000000a     
+                  0000cfa2    00000004     (.cinit..bss.load) [load image, compression = zero_init]
+                  0000cfa6    00000002     (__TI_handler_table)
+                  0000cfa8    00000004     (__TI_cinit_table)
+
+.init_array 
+*          0    0000c000    00000000     UNINITIALIZED
+
+TRAPINT    0    0000ffe0    00000002     
+                  0000ffe0    00000002     rts430_eabi.lib : int00.obj (.int00)
+
+$fill000   0    0000ffde    00000002     
+                  0000ffde    00000002     --HOLE-- [fill = ffff]
+
+PORT1      0    0000ffe4    00000002     
+                  0000ffe4    00000002     rts430_eabi.lib : int02.obj (.int02)
+
+PORT2      0    0000ffe6    00000002     
+                  0000ffe6    00000002     rts430_eabi.lib : int03.obj (.int03)
+
+ADC10      0    0000ffea    00000002     
+                  0000ffea    00000002     rts430_eabi.lib : int05.obj (.int05)
+
+USCIAB0TX 
+*          0    0000ffec    00000002     
+                  0000ffec    00000002     rts430_eabi.lib : int06.obj (.int06)
+
+USCIAB0RX 
+*          0    0000ffee    00000002     
+                  0000ffee    00000002     rts430_eabi.lib : int07.obj (.int07)
+
+TIMER0_A1 
+*          0    0000fff0    00000002     
+                  0000fff0    00000002     rts430_eabi.lib : int08.obj (.int08)
+
+TIMER0_A0 
+*          0    0000fff2    00000002     
+                  0000fff2    00000002     bsp.obj (.int09)
+
+WDT        0    0000fff4    00000002     
+                  0000fff4    00000002     rts430_eabi.lib : int10.obj (.int10)
+
+COMPARATORA 
+*          0    0000fff6    00000002     
+                  0000fff6    00000002     rts430_eabi.lib : int11.obj (.int11)
+
+TIMER1_A1 
+*          0    0000fff8    00000002     
+                  0000fff8    00000002     rts430_eabi.lib : int12.obj (.int12)
+
+TIMER1_A0 
+*          0    0000fffa    00000002     
+                  0000fffa    00000002     rts430_eabi.lib : int13.obj (.int13)
+
+NMI        0    0000fffc    00000002     
+                  0000fffc    00000002     bsp.obj (.int14)
+
+.reset     0    0000fffe    00000002     
+                  0000fffe    00000002     rts430_eabi.lib : boot.obj (.reset)
+
+
+LINKER GENERATED COPY TABLES
+
+__TI_cinit_table @ 0000cfa8 records: 1, size/record: 4, table size: 4
+	.bss: load addr=0000cfa2, load size=00000004 bytes, run addr=00000200, run size=0000006e bytes, compression=zero_init
+
+
+LINKER GENERATED HANDLER TABLE
+
+__TI_handler_table @ 0000cfa6 records: 1, size/record: 2, table size: 2
+	index: 0, handler: __TI_zero_init
+
+
+GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name 
+
+address   name                    
+-------   ----                    
+0000004a  ADC10AE0                
+000001b0  ADC10CTL0               
+000001b2  ADC10CTL1               
+00000048  ADC10DTC0               
+00000049  ADC10DTC1               
+000001b4  ADC10MEM                
+000001bc  ADC10SA                 
+0000023c  AO_Blinky               
+00000254  AO_Button               
+00000057  BCSCTL1                 
+00000058  BCSCTL2                 
+00000053  BCSCTL3                 
+0000cd38  BSP_init                
+0000ce4a  Blinky_ctor             
+0000cec8  Button_ctor             
+0000cf52  C$$EXIT                 
+00000059  CACTL1                  
+0000005a  CACTL2                  
+000010fb  CALBC1_12MHZ            
+000010f9  CALBC1_16MHZ            
+000010ff  CALBC1_1MHZ             
+000010fd  CALBC1_8MHZ             
+000010fa  CALDCO_12MHZ            
+000010f8  CALDCO_16MHZ            
+000010fe  CALDCO_1MHZ             
+000010fc  CALDCO_8MHZ             
+0000005b  CAPD                    
+00000056  DCOCTL                  
+00000128  FCTL1                   
+0000012a  FCTL2                   
+0000012c  FCTL3                   
+00000000  IE1                     
+00000001  IE2                     
+00000002  IFG1                    
+00000003  IFG2                    
+0000c98c  LCD_Clear               
+0000c000  LCD_init                
+00000022  P1DIR                   
+00000025  P1IE                    
+00000024  P1IES                   
+00000023  P1IFG                   
+00000020  P1IN                    
+00000021  P1OUT                   
+00000027  P1REN                   
+00000026  P1SEL                   
+00000041  P1SEL2                  
+0000002a  P2DIR                   
+0000002d  P2IE                    
+0000002c  P2IES                   
+0000002b  P2IFG                   
+00000028  P2IN                    
+00000029  P2OUT                   
+0000002f  P2REN                   
+0000002e  P2SEL                   
+00000042  P2SEL2                  
+0000001a  P3DIR                   
+00000018  P3IN                    
+00000019  P3OUT                   
+00000010  P3REN                   
+0000001b  P3SEL                   
+00000043  P3SEL2                  
+0000ce8c  QActive_armX            
+0000ceda  QActive_ctor            
+0000c746  QActive_postXISR_       
+0000c698  QActive_postX_          
+0000cf56  QF_active               
+0000cf68  QF_log2Lkup             
+0000cf46  QF_onIdle               
+0000cf2a  QF_onStartup            
+0000026c  QF_readySet_            
+0000c4ca  QF_run                  
+0000cba4  QF_tickXISR             
+0000ceec  QHsm_ctor               
+0000c39e  QHsm_dispatch_          
+0000c5d6  QHsm_init_              
+0000cf4a  QHsm_top                
+0000cf3a  Q_onAssert              
+0000ca74  SPIA_Write16            
+0000c90e  SPIA_Write24            
+0000c7ee  SPIA_Write32            
+0000cc58  SPIA_Write8             
+0000cd66  SPIA_WriteCommand       
+0000cd92  SPIA_WriteData          
+0000ca08  SPIA_init               
+00000172  TA0CCR0                 
+00000174  TA0CCR1                 
+00000176  TA0CCR2                 
+00000162  TA0CCTL0                
+00000164  TA0CCTL1                
+00000166  TA0CCTL2                
+00000160  TA0CTL                  
+0000012e  TA0IV                   
+00000170  TA0R                    
+00000192  TA1CCR0                 
+00000194  TA1CCR1                 
+00000196  TA1CCR2                 
+00000182  TA1CCTL0                
+00000184  TA1CCTL1                
+00000186  TA1CCTL2                
+00000180  TA1CTL                  
+0000011e  TA1IV                   
+00000190  TA1R                    
+000010db  TLV_ADC10_1_LEN         
+000010da  TLV_ADC10_1_TAG         
+000010c0  TLV_CHECKSUM            
+000010f7  TLV_DCO_30_LEN          
+000010f6  TLV_DCO_30_TAG          
+0000005d  UCA0ABCTL               
+00000062  UCA0BR0                 
+00000063  UCA0BR1                 
+00000060  UCA0CTL0                
+00000061  UCA0CTL1                
+0000005f  UCA0IRRCTL              
+0000005e  UCA0IRTCTL              
+00000064  UCA0MCTL                
+00000066  UCA0RXBUF               
+00000065  UCA0STAT                
+00000067  UCA0TXBUF               
+0000006a  UCB0BR0                 
+0000006b  UCB0BR1                 
+00000068  UCB0CTL0                
+00000069  UCB0CTL1                
+0000006c  UCB0I2CIE               
+00000118  UCB0I2COA               
+0000011a  UCB0I2CSA               
+0000006e  UCB0RXBUF               
+0000006d  UCB0STAT                
+0000006f  UCB0TXBUF               
+00000120  WDTCTL                  
+00000400  __STACK_END             
+00000050  __STACK_SIZE            
+0000cfa8  __TI_CINIT_Base         
+0000cfac  __TI_CINIT_Limit        
+0000cfa6  __TI_Handler_Table_Base 
+0000cfa8  __TI_Handler_Table_Limit
+UNDEFED   __TI_INITARRAY_Base     
+UNDEFED   __TI_INITARRAY_Limit    
+0000cf40  __TI_ISR_TRAP           
+0000ffe0  __TI_int00              
+0000ffe4  __TI_int02              
+0000ffe6  __TI_int03              
+0000ffea  __TI_int05              
+0000ffec  __TI_int06              
+0000ffee  __TI_int07              
+0000fff0  __TI_int08              
+0000fff2  __TI_int09              
+0000fff4  __TI_int10              
+0000fff6  __TI_int11              
+0000fff8  __TI_int12              
+0000fffa  __TI_int13              
+0000fffc  __TI_int14              
+0000cea0  __TI_zero_init          
+ffffffff  __binit__               
+ffffffff  __c_args__              
+0000cf1c  __mspabi_func_epilog_1  
+0000cf1a  __mspabi_func_epilog_2  
+0000cf18  __mspabi_func_epilog_3  
+0000cf16  __mspabi_func_epilog_4  
+0000cf14  __mspabi_func_epilog_5  
+0000cf12  __mspabi_func_epilog_6  
+0000cf10  __mspabi_func_epilog_7  
+0000ceb4  __mspabi_mpyi           
+0000ceb4  __mspabi_mpyi_sw        
+0000cdbe  __mspabi_slli           
+0000cde6  __mspabi_slli_1         
+0000cdd4  __mspabi_slli_10        
+0000cdd2  __mspabi_slli_11        
+0000cdd0  __mspabi_slli_12        
+0000cdce  __mspabi_slli_13        
+0000cdcc  __mspabi_slli_14        
+0000cdca  __mspabi_slli_15        
+0000cde4  __mspabi_slli_2         
+0000cde2  __mspabi_slli_3         
+0000cde0  __mspabi_slli_4         
+0000cdde  __mspabi_slli_5         
+0000cddc  __mspabi_slli_6         
+0000cdda  __mspabi_slli_7         
+0000cdd8  __mspabi_slli_8         
+0000cdd6  __mspabi_slli_9         
+0000cd32  __mspabi_slll_1         
+0000cd0e  __mspabi_slll_10        
+0000cd0a  __mspabi_slll_11        
+0000cd06  __mspabi_slll_12        
+0000cd02  __mspabi_slll_13        
+0000ccfe  __mspabi_slll_14        
+0000ccfa  __mspabi_slll_15        
+0000cd2e  __mspabi_slll_2         
+0000cd2a  __mspabi_slll_3         
+0000cd26  __mspabi_slll_4         
+0000cd22  __mspabi_slll_5         
+0000cd1e  __mspabi_slll_6         
+0000cd1a  __mspabi_slll_7         
+0000cd16  __mspabi_slll_8         
+0000cd12  __mspabi_slll_9         
+0000ccae  __mspabi_srli           
+0000ccf4  __mspabi_srli_1         
+0000ccd0  __mspabi_srli_10        
+0000cccc  __mspabi_srli_11        
+0000ccc8  __mspabi_srli_12        
+0000ccc4  __mspabi_srli_13        
+0000ccc0  __mspabi_srli_14        
+0000ccbc  __mspabi_srli_15        
+0000ccf0  __mspabi_srli_2         
+0000ccec  __mspabi_srli_3         
+0000cce8  __mspabi_srli_4         
+0000cce4  __mspabi_srli_5         
+0000cce0  __mspabi_srli_6         
+0000ccdc  __mspabi_srli_7         
+0000ccd8  __mspabi_srli_8         
+0000ccd4  __mspabi_srli_9         
+0000cc00  _auto_init              
+0000ce30  _c_int00_noargs_noexit  
+0000fffe  _reset_vector           
+000003b0  _stack                  
+0000cf4e  _system_pre_init        
+0000cf52  abort                   
+ffffffff  binit                   
+0000ce62  delay_us                
+0000cefe  main                    
+0000cf32  nmi_ISR                 
+0000cdea  rgb2bgr                 
+0000ce14  timerA_ISR              
+
+
+GLOBAL SYMBOLS: SORTED BY Symbol Address 
+
+address   name                    
+-------   ----                    
+00000000  IE1                     
+00000001  IE2                     
+00000002  IFG1                    
+00000003  IFG2                    
+00000010  P3REN                   
+00000018  P3IN                    
+00000019  P3OUT                   
+0000001a  P3DIR                   
+0000001b  P3SEL                   
+00000020  P1IN                    
+00000021  P1OUT                   
+00000022  P1DIR                   
+00000023  P1IFG                   
+00000024  P1IES                   
+00000025  P1IE                    
+00000026  P1SEL                   
+00000027  P1REN                   
+00000028  P2IN                    
+00000029  P2OUT                   
+0000002a  P2DIR                   
+0000002b  P2IFG                   
+0000002c  P2IES                   
+0000002d  P2IE                    
+0000002e  P2SEL                   
+0000002f  P2REN                   
+00000041  P1SEL2                  
+00000042  P2SEL2                  
+00000043  P3SEL2                  
+00000048  ADC10DTC0               
+00000049  ADC10DTC1               
+0000004a  ADC10AE0                
+00000050  __STACK_SIZE            
+00000053  BCSCTL3                 
+00000056  DCOCTL                  
+00000057  BCSCTL1                 
+00000058  BCSCTL2                 
+00000059  CACTL1                  
+0000005a  CACTL2                  
+0000005b  CAPD                    
+0000005d  UCA0ABCTL               
+0000005e  UCA0IRTCTL              
+0000005f  UCA0IRRCTL              
+00000060  UCA0CTL0                
+00000061  UCA0CTL1                
+00000062  UCA0BR0                 
+00000063  UCA0BR1                 
+00000064  UCA0MCTL                
+00000065  UCA0STAT                
+00000066  UCA0RXBUF               
+00000067  UCA0TXBUF               
+00000068  UCB0CTL0                
+00000069  UCB0CTL1                
+0000006a  UCB0BR0                 
+0000006b  UCB0BR1                 
+0000006c  UCB0I2CIE               
+0000006d  UCB0STAT                
+0000006e  UCB0RXBUF               
+0000006f  UCB0TXBUF               
+00000118  UCB0I2COA               
+0000011a  UCB0I2CSA               
+0000011e  TA1IV                   
+00000120  WDTCTL                  
+00000128  FCTL1                   
+0000012a  FCTL2                   
+0000012c  FCTL3                   
+0000012e  TA0IV                   
+00000160  TA0CTL                  
+00000162  TA0CCTL0                
+00000164  TA0CCTL1                
+00000166  TA0CCTL2                
+00000170  TA0R                    
+00000172  TA0CCR0                 
+00000174  TA0CCR1                 
+00000176  TA0CCR2                 
+00000180  TA1CTL                  
+00000182  TA1CCTL0                
+00000184  TA1CCTL1                
+00000186  TA1CCTL2                
+00000190  TA1R                    
+00000192  TA1CCR0                 
+00000194  TA1CCR1                 
+00000196  TA1CCR2                 
+000001b0  ADC10CTL0               
+000001b2  ADC10CTL1               
+000001b4  ADC10MEM                
+000001bc  ADC10SA                 
+0000023c  AO_Blinky               
+00000254  AO_Button               
+0000026c  QF_readySet_            
+000003b0  _stack                  
+00000400  __STACK_END             
+000010c0  TLV_CHECKSUM            
+000010da  TLV_ADC10_1_TAG         
+000010db  TLV_ADC10_1_LEN         
+000010f6  TLV_DCO_30_TAG          
+000010f7  TLV_DCO_30_LEN          
+000010f8  CALDCO_16MHZ            
+000010f9  CALBC1_16MHZ            
+000010fa  CALDCO_12MHZ            
+000010fb  CALBC1_12MHZ            
+000010fc  CALDCO_8MHZ             
+000010fd  CALBC1_8MHZ             
+000010fe  CALDCO_1MHZ             
+000010ff  CALBC1_1MHZ             
+0000c000  LCD_init                
+0000c39e  QHsm_dispatch_          
+0000c4ca  QF_run                  
+0000c5d6  QHsm_init_              
+0000c698  QActive_postX_          
+0000c746  QActive_postXISR_       
+0000c7ee  SPIA_Write32            
+0000c90e  SPIA_Write24            
+0000c98c  LCD_Clear               
+0000ca08  SPIA_init               
+0000ca74  SPIA_Write16            
+0000cba4  QF_tickXISR             
+0000cc00  _auto_init              
+0000cc58  SPIA_Write8             
+0000ccae  __mspabi_srli           
+0000ccbc  __mspabi_srli_15        
+0000ccc0  __mspabi_srli_14        
+0000ccc4  __mspabi_srli_13        
+0000ccc8  __mspabi_srli_12        
+0000cccc  __mspabi_srli_11        
+0000ccd0  __mspabi_srli_10        
+0000ccd4  __mspabi_srli_9         
+0000ccd8  __mspabi_srli_8         
+0000ccdc  __mspabi_srli_7         
+0000cce0  __mspabi_srli_6         
+0000cce4  __mspabi_srli_5         
+0000cce8  __mspabi_srli_4         
+0000ccec  __mspabi_srli_3         
+0000ccf0  __mspabi_srli_2         
+0000ccf4  __mspabi_srli_1         
+0000ccfa  __mspabi_slll_15        
+0000ccfe  __mspabi_slll_14        
+0000cd02  __mspabi_slll_13        
+0000cd06  __mspabi_slll_12        
+0000cd0a  __mspabi_slll_11        
+0000cd0e  __mspabi_slll_10        
+0000cd12  __mspabi_slll_9         
+0000cd16  __mspabi_slll_8         
+0000cd1a  __mspabi_slll_7         
+0000cd1e  __mspabi_slll_6         
+0000cd22  __mspabi_slll_5         
+0000cd26  __mspabi_slll_4         
+0000cd2a  __mspabi_slll_3         
+0000cd2e  __mspabi_slll_2         
+0000cd32  __mspabi_slll_1         
+0000cd38  BSP_init                
+0000cd66  SPIA_WriteCommand       
+0000cd92  SPIA_WriteData          
+0000cdbe  __mspabi_slli           
+0000cdca  __mspabi_slli_15        
+0000cdcc  __mspabi_slli_14        
+0000cdce  __mspabi_slli_13        
+0000cdd0  __mspabi_slli_12        
+0000cdd2  __mspabi_slli_11        
+0000cdd4  __mspabi_slli_10        
+0000cdd6  __mspabi_slli_9         
+0000cdd8  __mspabi_slli_8         
+0000cdda  __mspabi_slli_7         
+0000cddc  __mspabi_slli_6         
+0000cdde  __mspabi_slli_5         
+0000cde0  __mspabi_slli_4         
+0000cde2  __mspabi_slli_3         
+0000cde4  __mspabi_slli_2         
+0000cde6  __mspabi_slli_1         
+0000cdea  rgb2bgr                 
+0000ce14  timerA_ISR              
+0000ce30  _c_int00_noargs_noexit  
+0000ce4a  Blinky_ctor             
+0000ce62  delay_us                
+0000ce8c  QActive_armX            
+0000cea0  __TI_zero_init          
+0000ceb4  __mspabi_mpyi           
+0000ceb4  __mspabi_mpyi_sw        
+0000cec8  Button_ctor             
+0000ceda  QActive_ctor            
+0000ceec  QHsm_ctor               
+0000cefe  main                    
+0000cf10  __mspabi_func_epilog_7  
+0000cf12  __mspabi_func_epilog_6  
+0000cf14  __mspabi_func_epilog_5  
+0000cf16  __mspabi_func_epilog_4  
+0000cf18  __mspabi_func_epilog_3  
+0000cf1a  __mspabi_func_epilog_2  
+0000cf1c  __mspabi_func_epilog_1  
+0000cf2a  QF_onStartup            
+0000cf32  nmi_ISR                 
+0000cf3a  Q_onAssert              
+0000cf40  __TI_ISR_TRAP           
+0000cf46  QF_onIdle               
+0000cf4a  QHsm_top                
+0000cf4e  _system_pre_init        
+0000cf52  C$$EXIT                 
+0000cf52  abort                   
+0000cf56  QF_active               
+0000cf68  QF_log2Lkup             
+0000cfa6  __TI_Handler_Table_Base 
+0000cfa8  __TI_CINIT_Base         
+0000cfa8  __TI_Handler_Table_Limit
+0000cfac  __TI_CINIT_Limit        
+0000ffe0  __TI_int00              
+0000ffe4  __TI_int02              
+0000ffe6  __TI_int03              
+0000ffea  __TI_int05              
+0000ffec  __TI_int06              
+0000ffee  __TI_int07              
+0000fff0  __TI_int08              
+0000fff2  __TI_int09              
+0000fff4  __TI_int10              
+0000fff6  __TI_int11              
+0000fff8  __TI_int12              
+0000fffa  __TI_int13              
+0000fffc  __TI_int14              
+0000fffe  _reset_vector           
+ffffffff  __binit__               
+ffffffff  __c_args__              
+ffffffff  binit                   
+UNDEFED   __TI_INITARRAY_Base     
+UNDEFED   __TI_INITARRAY_Limit    
+
+[222 symbols]
