@@ -141,9 +141,11 @@ QState Blinky_off(Blinky * const me) {
     return status;
 }
 /*..........................................................................*/
-QState Blinky_on(Blinky * const me) {
+QState Blinky_on(Blinky * const me)
+{
     QState status;
-    switch (Q_SIG(me)) {
+    switch (Q_SIG(me))
+    {
         case Q_ENTRY_SIG:
         {
         	P1OUT |= BIT0;
@@ -159,7 +161,6 @@ QState Blinky_on(Blinky * const me) {
         {
             status = Q_HANDLED();
             break;
-
         }
 
         case Q_TIMEOUT_SIG:
@@ -192,6 +193,7 @@ QState Blinky_on(Blinky * const me) {
             break;
         }
     }
+
     return status;
 }
 
