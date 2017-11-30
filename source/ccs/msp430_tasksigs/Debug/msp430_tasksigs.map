@@ -1,10 +1,10 @@
 ******************************************************************************
                   MSP430 Linker PC v4.4.5                      
 ******************************************************************************
->> Linked Sat Nov 25 21:19:49 2017
+>> Linked Wed Nov 29 17:39:23 2017
 
-OUTPUT FILE NAME:   <msp430_task1.out>
-ENTRY POINT SYMBOL: "_c_int00_noargs_noexit"  address: 0000c2d8
+OUTPUT FILE NAME:   <msp430_tasksigs.out>
+ENTRY POINT SYMBOL: "_c_int00_noargs_noexit"  address: 0000c626
 
 
 MEMORY CONFIGURATION
@@ -14,12 +14,12 @@ MEMORY CONFIGURATION
   SFR                   00000000   00000010  00000000  00000010  RWIX
   PERIPHERALS_8BIT      00000010   000000f0  00000000  000000f0  RWIX
   PERIPHERALS_16BIT     00000100   00000100  00000000  00000100  RWIX
-  RAM                   00000200   00000200  000000e6  0000011a  RWIX
+  RAM                   00000200   00000200  000001f2  0000000e  RWIX
   INFOD                 00001000   00000040  00000000  00000040  RWIX
   INFOC                 00001040   00000040  00000000  00000040  RWIX
   INFOB                 00001080   00000040  00000000  00000040  RWIX
   INFOA                 000010c0   00000040  00000000  00000040  RWIX
-  FLASH                 0000c000   00003fde  00000382  00003c5c  RWIX
+  FLASH                 0000c000   00003fde  00000720  000038be  RWIX
   BSLSIGNATURE          0000ffde   00000002  00000002  00000000  RWIX  ffff 
   INT00                 0000ffe0   00000002  00000002  00000000  RWIX
   INT01                 0000ffe2   00000002  00000000  00000002  RWIX
@@ -44,43 +44,57 @@ SECTION ALLOCATION MAP
  output                                  attributes/
 section   page    origin      length       input sections
 --------  ----  ----------  ----------   ----------------
-.bss       0    00000200    00000066     UNINITIALIZED
-                  00000200    00000064     (.common:TaskTable)
-                  00000264    00000002     (.common:TimeDelay)
+.bss       0    00000200    000001a2     UNINITIALIZED
+                  00000200    000001a0     (.common:TaskTable)
+                  000003a0    00000002     (.common:TimeDelay)
 
-.stack     0    00000380    00000080     UNINITIALIZED
-                  00000380    00000002     rts430_eabi.lib : boot.obj (.stack)
-                  00000382    0000007e     --HOLE--
+.stack     0    000003b0    00000050     UNINITIALIZED
+                  000003b0    00000002     rts430_eabi.lib : boot.obj (.stack)
+                  000003b2    0000004e     --HOLE--
 
-.text      0    0000c000    00000378     
-                  0000c000    0000007c     task.obj (.text:Task_AddTask)
-                  0000c07c    0000007c     task.obj (.text:Task_TimerISRHandler)
-                  0000c0f8    00000066     task.obj (.text:Task_Init)
-                  0000c15e    00000060     task.obj (.text:Task_StartScheduler)
-                  0000c1be    00000058     rts430_eabi.lib : autoinit.obj (.text:_auto_init)
-                  0000c216    00000040     main.obj (.text:main)
-                  0000c256    0000003e     main.obj (.text:TimerA_init)
-                  0000c294    00000022     main.obj (.text:GPIO_init)
-                  0000c2b6    00000022     main.obj (.text:Timer_A)
-                  0000c2d8    0000001a     rts430_eabi.lib : boot_special.obj (.text:_c_int00_noargs_noexit)
-                  0000c2f2    00000014                     : copy_zero_init.obj (.text:decompress:ZI:__TI_zero_init)
-                  0000c306    00000014                     : mult16.obj (.text)
-                  0000c31a    00000010                     : epilog.obj (.text)
-                  0000c32a    0000000c     main.obj (.text:Interrupt_init)
-                  0000c336    0000000c     main.obj (.text:Port_1)
-                  0000c342    0000000c     main.obj (.text:TimeDelay_Decrement)
-                  0000c34e    00000008     main.obj (.text:LedGreen_Clear)
-                  0000c356    00000008     main.obj (.text:LedGreen_Toggle)
-                  0000c35e    00000006     main.obj (.text:LedRed_Clear)
-                  0000c364    00000006     main.obj (.text:LedRed_Toggle)
-                  0000c36a    00000006     rts430_eabi.lib : isr_trap.obj (.text:_isr:__TI_ISR_TRAP)
-                  0000c370    00000004                     : pre_init.obj (.text:_system_pre_init)
-                  0000c374    00000004                     : exit.obj (.text:abort)
+.text      0    0000c000    00000700     
+                  0000c000    000000c6     task.obj (.text:Task_AddTask)
+                  0000c0c6    000000aa     task.obj (.text:Task_SendMessage)
+                  0000c170    00000096     task.obj (.text:Task_GetNextMessage)
+                  0000c206    00000094     task.obj (.text:Task_Init)
+                  0000c29a    0000007e     main.obj (.text:TaskFunction_RX)
+                  0000c318    0000007c     task.obj (.text:Task_TimerISRHandler)
+                  0000c394    00000060     task.obj (.text:Task_ClearAllMessages)
+                  0000c3f4    0000005c     task.obj (.text:Task_StartScheduler)
+                  0000c450    0000005a     main.obj (.text:main)
+                  0000c4aa    00000058     rts430_eabi.lib : autoinit.obj (.text:_auto_init)
+                  0000c502    00000040     main.obj (.text:TaskFunction_TX)
+                  0000c542    0000003e     main.obj (.text:TimerA_init)
+                  0000c580    00000036     task.obj (.text:Task_GetIndexFromName)
+                  0000c5b6    0000002c     rts430_eabi.lib : strncpy.obj (.text:strncpy)
+                  0000c5e2    00000022     main.obj (.text:GPIO_init)
+                  0000c604    00000022     main.obj (.text:Timer_A)
+                  0000c626    0000001a     rts430_eabi.lib : boot_special.obj (.text:_c_int00_noargs_noexit)
+                  0000c640    00000018                     : strcmp.obj (.text:strcmp)
+                  0000c658    00000014                     : copy_zero_init.obj (.text:decompress:ZI:__TI_zero_init)
+                  0000c66c    00000014                     : memset.obj (.text:memset)
+                  0000c680    00000014                     : mult16.obj (.text)
+                  0000c694    00000010                     : epilog.obj (.text)
+                  0000c6a4    0000000c     main.obj (.text:Interrupt_init)
+                  0000c6b0    0000000c     main.obj (.text:Port_1)
+                  0000c6bc    0000000c     main.obj (.text:TimeDelay_Decrement)
+                  0000c6c8    00000008     main.obj (.text:LedGreen_Clear)
+                  0000c6d0    00000008     main.obj (.text:LedGreen_Set)
+                  0000c6d8    00000008     main.obj (.text:LedGreen_Toggle)
+                  0000c6e0    00000006     main.obj (.text:LedRed_Clear)
+                  0000c6e6    00000006     main.obj (.text:LedRed_Set)
+                  0000c6ec    00000006     main.obj (.text:LedRed_Toggle)
+                  0000c6f2    00000006     rts430_eabi.lib : isr_trap.obj (.text:_isr:__TI_ISR_TRAP)
+                  0000c6f8    00000004                     : pre_init.obj (.text:_system_pre_init)
+                  0000c6fc    00000004                     : exit.obj (.text:abort)
 
-.cinit     0    0000c378    0000000a     
-                  0000c378    00000004     (.cinit..bss.load) [load image, compression = zero_init]
-                  0000c37c    00000002     (__TI_handler_table)
-                  0000c37e    00000004     (__TI_cinit_table)
+.const     0    0000c700    00000016     
+                  0000c700    00000016     main.obj (.const:.string)
+
+.cinit     0    0000c716    0000000a     
+                  0000c716    00000004     (.cinit..bss.load) [load image, compression = zero_init]
+                  0000c71a    00000002     (__TI_handler_table)
+                  0000c71c    00000004     (__TI_cinit_table)
 
 .init_array 
 *          0    0000c000    00000000     UNINITIALIZED
@@ -140,13 +154,13 @@ NMI        0    0000fffc    00000002
 
 LINKER GENERATED COPY TABLES
 
-__TI_cinit_table @ 0000c37e records: 1, size/record: 4, table size: 4
-	.bss: load addr=0000c378, load size=00000004 bytes, run addr=00000200, run size=00000066 bytes, compression=zero_init
+__TI_cinit_table @ 0000c71c records: 1, size/record: 4, table size: 4
+	.bss: load addr=0000c716, load size=00000004 bytes, run addr=00000200, run size=000001a2 bytes, compression=zero_init
 
 
 LINKER GENERATED HANDLER TABLE
 
-__TI_handler_table @ 0000c37c records: 1, size/record: 2, table size: 2
+__TI_handler_table @ 0000c71a records: 1, size/record: 2, table size: 2
 	index: 0, handler: __TI_zero_init
 
 
@@ -164,7 +178,7 @@ address   name
 00000057  BCSCTL1                 
 00000058  BCSCTL2                 
 00000053  BCSCTL3                 
-0000c374  C$$EXIT                 
+0000c6fc  C$$EXIT                 
 00000059  CACTL1                  
 0000005a  CACTL2                  
 000010fb  CALBC1_12MHZ            
@@ -180,16 +194,18 @@ address   name
 00000128  FCTL1                   
 0000012a  FCTL2                   
 0000012c  FCTL3                   
-0000c294  GPIO_init               
+0000c5e2  GPIO_init               
 00000000  IE1                     
 00000001  IE2                     
 00000002  IFG1                    
 00000003  IFG2                    
-0000c32a  Interrupt_init          
-0000c34e  LedGreen_Clear          
-0000c356  LedGreen_Toggle         
-0000c35e  LedRed_Clear            
-0000c364  LedRed_Toggle           
+0000c6a4  Interrupt_init          
+0000c6c8  LedGreen_Clear          
+0000c6d0  LedGreen_Set            
+0000c6d8  LedGreen_Toggle         
+0000c6e0  LedRed_Clear            
+0000c6e6  LedRed_Set              
+0000c6ec  LedRed_Toggle           
 00000022  P1DIR                   
 00000025  P1IE                    
 00000024  P1IES                   
@@ -214,7 +230,7 @@ address   name
 00000010  P3REN                   
 0000001b  P3SEL                   
 00000043  P3SEL2                  
-0000c336  Port_1                  
+0000c6b0  Port_1                  
 00000172  TA0CCR0                 
 00000174  TA0CCR1                 
 00000176  TA0CCR2                 
@@ -238,13 +254,20 @@ address   name
 000010c0  TLV_CHECKSUM            
 000010f7  TLV_DCO_30_LEN          
 000010f6  TLV_DCO_30_TAG          
+0000c6d8  TaskFunction_LedGreen   
+0000c29a  TaskFunction_RX         
+0000c502  TaskFunction_TX         
 0000c000  Task_AddTask            
-0000c0f8  Task_Init               
-0000c15e  Task_StartScheduler     
-0000c07c  Task_TimerISRHandler    
-0000c342  TimeDelay_Decrement     
-0000c256  TimerA_init             
-0000c2b6  Timer_A                 
+0000c394  Task_ClearAllMessages   
+0000c580  Task_GetIndexFromName   
+0000c170  Task_GetNextMessage     
+0000c206  Task_Init               
+0000c0c6  Task_SendMessage        
+0000c3f4  Task_StartScheduler     
+0000c318  Task_TimerISRHandler    
+0000c6bc  TimeDelay_Decrement     
+0000c542  TimerA_init             
+0000c604  Timer_A                 
 0000005d  UCA0ABCTL               
 00000062  UCA0BR0                 
 00000063  UCA0BR1                 
@@ -268,14 +291,14 @@ address   name
 0000006f  UCB0TXBUF               
 00000120  WDTCTL                  
 00000400  __STACK_END             
-00000080  __STACK_SIZE            
-0000c37e  __TI_CINIT_Base         
-0000c382  __TI_CINIT_Limit        
-0000c37c  __TI_Handler_Table_Base 
-0000c37e  __TI_Handler_Table_Limit
+00000050  __STACK_SIZE            
+0000c71c  __TI_CINIT_Base         
+0000c720  __TI_CINIT_Limit        
+0000c71a  __TI_Handler_Table_Base 
+0000c71c  __TI_Handler_Table_Limit
 UNDEFED   __TI_INITARRAY_Base     
 UNDEFED   __TI_INITARRAY_Limit    
-0000c36a  __TI_ISR_TRAP           
+0000c6f2  __TI_ISR_TRAP           
 0000ffe0  __TI_int00              
 0000ffe4  __TI_int02              
 0000ffe6  __TI_int03              
@@ -289,26 +312,29 @@ UNDEFED   __TI_INITARRAY_Limit
 0000fff8  __TI_int12              
 0000fffa  __TI_int13              
 0000fffc  __TI_int14              
-0000c2f2  __TI_zero_init          
+0000c658  __TI_zero_init          
 ffffffff  __binit__               
 ffffffff  __c_args__              
-0000c326  __mspabi_func_epilog_1  
-0000c324  __mspabi_func_epilog_2  
-0000c322  __mspabi_func_epilog_3  
-0000c320  __mspabi_func_epilog_4  
-0000c31e  __mspabi_func_epilog_5  
-0000c31c  __mspabi_func_epilog_6  
-0000c31a  __mspabi_func_epilog_7  
-0000c306  __mspabi_mpyi           
-0000c306  __mspabi_mpyi_sw        
-0000c1be  _auto_init              
-0000c2d8  _c_int00_noargs_noexit  
+0000c6a0  __mspabi_func_epilog_1  
+0000c69e  __mspabi_func_epilog_2  
+0000c69c  __mspabi_func_epilog_3  
+0000c69a  __mspabi_func_epilog_4  
+0000c698  __mspabi_func_epilog_5  
+0000c696  __mspabi_func_epilog_6  
+0000c694  __mspabi_func_epilog_7  
+0000c680  __mspabi_mpyi           
+0000c680  __mspabi_mpyi_sw        
+0000c4aa  _auto_init              
+0000c626  _c_int00_noargs_noexit  
 0000fffe  _reset_vector           
-00000380  _stack                  
-0000c370  _system_pre_init        
-0000c374  abort                   
+000003b0  _stack                  
+0000c6f8  _system_pre_init        
+0000c6fc  abort                   
 ffffffff  binit                   
-0000c216  main                    
+0000c450  main                    
+0000c66c  memset                  
+0000c640  strcmp                  
+0000c5b6  strncpy                 
 
 
 GLOBAL SYMBOLS: SORTED BY Symbol Address 
@@ -346,6 +372,7 @@ address   name
 00000048  ADC10DTC0               
 00000049  ADC10DTC1               
 0000004a  ADC10AE0                
+00000050  __STACK_SIZE            
 00000053  BCSCTL3                 
 00000056  DCOCTL                  
 00000057  BCSCTL1                 
@@ -372,7 +399,6 @@ address   name
 0000006d  UCB0STAT                
 0000006e  UCB0RXBUF               
 0000006f  UCB0TXBUF               
-00000080  __STACK_SIZE            
 00000118  UCB0I2COA               
 0000011a  UCB0I2CSA               
 0000011e  TA1IV                   
@@ -401,7 +427,7 @@ address   name
 000001b2  ADC10CTL1               
 000001b4  ADC10MEM                
 000001bc  ADC10SA                 
-00000380  _stack                  
+000003b0  _stack                  
 00000400  __STACK_END             
 000010c0  TLV_CHECKSUM            
 000010da  TLV_ADC10_1_TAG         
@@ -417,40 +443,52 @@ address   name
 000010fe  CALDCO_1MHZ             
 000010ff  CALBC1_1MHZ             
 0000c000  Task_AddTask            
-0000c07c  Task_TimerISRHandler    
-0000c0f8  Task_Init               
-0000c15e  Task_StartScheduler     
-0000c1be  _auto_init              
-0000c216  main                    
-0000c256  TimerA_init             
-0000c294  GPIO_init               
-0000c2b6  Timer_A                 
-0000c2d8  _c_int00_noargs_noexit  
-0000c2f2  __TI_zero_init          
-0000c306  __mspabi_mpyi           
-0000c306  __mspabi_mpyi_sw        
-0000c31a  __mspabi_func_epilog_7  
-0000c31c  __mspabi_func_epilog_6  
-0000c31e  __mspabi_func_epilog_5  
-0000c320  __mspabi_func_epilog_4  
-0000c322  __mspabi_func_epilog_3  
-0000c324  __mspabi_func_epilog_2  
-0000c326  __mspabi_func_epilog_1  
-0000c32a  Interrupt_init          
-0000c336  Port_1                  
-0000c342  TimeDelay_Decrement     
-0000c34e  LedGreen_Clear          
-0000c356  LedGreen_Toggle         
-0000c35e  LedRed_Clear            
-0000c364  LedRed_Toggle           
-0000c36a  __TI_ISR_TRAP           
-0000c370  _system_pre_init        
-0000c374  C$$EXIT                 
-0000c374  abort                   
-0000c37c  __TI_Handler_Table_Base 
-0000c37e  __TI_CINIT_Base         
-0000c37e  __TI_Handler_Table_Limit
-0000c382  __TI_CINIT_Limit        
+0000c0c6  Task_SendMessage        
+0000c170  Task_GetNextMessage     
+0000c206  Task_Init               
+0000c29a  TaskFunction_RX         
+0000c318  Task_TimerISRHandler    
+0000c394  Task_ClearAllMessages   
+0000c3f4  Task_StartScheduler     
+0000c450  main                    
+0000c4aa  _auto_init              
+0000c502  TaskFunction_TX         
+0000c542  TimerA_init             
+0000c580  Task_GetIndexFromName   
+0000c5b6  strncpy                 
+0000c5e2  GPIO_init               
+0000c604  Timer_A                 
+0000c626  _c_int00_noargs_noexit  
+0000c640  strcmp                  
+0000c658  __TI_zero_init          
+0000c66c  memset                  
+0000c680  __mspabi_mpyi           
+0000c680  __mspabi_mpyi_sw        
+0000c694  __mspabi_func_epilog_7  
+0000c696  __mspabi_func_epilog_6  
+0000c698  __mspabi_func_epilog_5  
+0000c69a  __mspabi_func_epilog_4  
+0000c69c  __mspabi_func_epilog_3  
+0000c69e  __mspabi_func_epilog_2  
+0000c6a0  __mspabi_func_epilog_1  
+0000c6a4  Interrupt_init          
+0000c6b0  Port_1                  
+0000c6bc  TimeDelay_Decrement     
+0000c6c8  LedGreen_Clear          
+0000c6d0  LedGreen_Set            
+0000c6d8  LedGreen_Toggle         
+0000c6d8  TaskFunction_LedGreen   
+0000c6e0  LedRed_Clear            
+0000c6e6  LedRed_Set              
+0000c6ec  LedRed_Toggle           
+0000c6f2  __TI_ISR_TRAP           
+0000c6f8  _system_pre_init        
+0000c6fc  C$$EXIT                 
+0000c6fc  abort                   
+0000c71a  __TI_Handler_Table_Base 
+0000c71c  __TI_CINIT_Base         
+0000c71c  __TI_Handler_Table_Limit
+0000c720  __TI_CINIT_Limit        
 0000ffe0  __TI_int00              
 0000ffe4  __TI_int02              
 0000ffe6  __TI_int03              
@@ -471,4 +509,4 @@ ffffffff  binit
 UNDEFED   __TI_INITARRAY_Base     
 UNDEFED   __TI_INITARRAY_Limit    
 
-[155 symbols]
+[167 symbols]
