@@ -44,6 +44,13 @@ void LED_Flash2(void);
 void LED_Flash3(void);
 
 
+void LED_Flash0_entry(void);
+void LED_Flash1_entry(void);
+void LED_Flash2_entry(void);
+void LED_Flash3_entry(void);
+
+
+
 #define FSM_NUM_STATES			4
 
 typedef enum
@@ -59,22 +66,23 @@ typedef struct
 {
 	StateName_t name;
 	uint16_t delay;
-	void (*fptr)(void);
+	void (*fptr)(void);							//function to run
+	void (*entryPtr)(void);						//entry function to run
 	StateName_t nextState[FSM_NUM_STATES];
 }State_t;
 
 
 State_t fsm[FSM_NUM_STATES] =
 {
-		{STATE0, 10, LED_Flash0, {STATE0, STATE1, STATE2, STATE3}},
-		{STATE1, 10, LED_Flash1, {STATE0, STATE1, STATE2, STATE3}},
-		{STATE2, 10, LED_Flash2, {STATE0, STATE1, STATE2, STATE3}},
-		{STATE3, 10, LED_Flash3, {STATE0, STATE1, STATE2, STATE3}},
+		{STATE0, 10, LED_Flash0, LED_Flash0_entry, {STATE0, STATE1, STATE2, STATE3}},
+		{STATE1, 10, LED_Flash1, LED_Flash1_entry, {STATE0, STATE1, STATE2, STATE3}},
+		{STATE2, 10, LED_Flash2, LED_Flash2_entry, {STATE0, STATE1, STATE2, STATE3}},
+		{STATE3, 10, LED_Flash3, LED_Flash3_entry, {STATE0, STATE1, STATE2, STATE3}},
 };
 
 static volatile StateName_t flashState = STATE0;
 static State_t currentState;
-
+static State_t lastState;
 
 
 //global variables
@@ -95,18 +103,24 @@ void main(void)
 	LedGreen_Clear();
 
 	currentState = fsm[flashState];
+	lastState = fsm[FSM_NUM_STATES -1];	//set to force update on first run
 
 	//main loop
 	while(1)
 	{
 		StateName_t next = currentState.nextState[flashState];
-
 		currentState = fsm[next];
 
-		currentState.fptr();
+		//state change?
+		if(lastState.name != currentState.name)
+			currentState.entryPtr();
 
+		//run the state function
+		currentState.fptr();
 		delay_ms(currentState.delay);
 
+		//update last state
+		lastState = fsm[next];
 	}
 }
 
@@ -138,7 +152,6 @@ void TimeDelay_Decrement(void)
 void GPIO_init(void)
 {
 	//setup bit 0 and 6 as output
-
 	P1DIR |= BIT0;
 	P1DIR |= BIT6;
 
@@ -150,8 +163,6 @@ void GPIO_init(void)
 	P1DIR &=~ BIT3;		//input
 	P1REN |= BIT3;		//enable pullup/down
 	P1OUT |= BIT3;		//resistor set to pull up
-
-
 
 }
 
@@ -247,7 +258,6 @@ __interrupt void Timer_A(void)
 	TACTL &=~ BIT0;
 
 	TimeDelay_Decrement();
-
 }
 
 
@@ -279,6 +289,53 @@ void WasteCPU(void)
 	volatile int t = 10000;
 	while(t >0)
 		t--;
+}
+
+
+
+
+
+void LED_Flash0_entry(void)
+{
+	int i;
+	for (i = 0 ; i < 10; i++)
+	{
+		LedRed_Toggle();
+		delay_ms(50);
+	}
+}
+
+void LED_Flash1_entry(void)
+{
+	int i;
+	for (i = 0 ; i < 10; i++)
+	{
+		LedGreen_Toggle();
+		delay_ms(50);
+	}
+}
+
+void LED_Flash2_entry(void)
+{
+	int i;
+	for (i = 0 ; i < 10; i++)
+	{
+		LedRed_Toggle();
+		LedGreen_Toggle();
+
+		delay_ms(50);
+	}
+}
+
+void LED_Flash3_entry(void)
+{
+	int i;
+	for (i = 0 ; i < 10; i++)
+	{
+		LedRed_Toggle();
+		LedGreen_Toggle();
+		delay_ms(50);
+	}
 }
 
 
