@@ -11,4 +11,4 @@ Project Listing
 
 - msp430_tasksig: Tasking project that uses a timer, a while loop, and two tasks.  One task sends a message to be evaluated by another task.  Messages are posted to an array of TaskMessages.  The receiver task reads all messages in the array when the task runs (ie, clears all messages).  So far, no checks are perfomred in the timer isr if a task is busy processing messages.
 
-- msp_430_MooreFSM:  A project that uses a simple Moore finite state machine.  The project contains 4 states and an input value that takes a value from 0 to 3.  Toggle the state by pressing the user button.  State pattern: input 0 - state0, input 1 - state 1.. etc.  
+- msp_430_MooreFSM:  A project that uses a simple Moore finite state machine.  The project contains 4 states and an input value that takes a value from 0 to 3.  Toggle the state by pressing the user button.  State pattern: input 0 - state0, input 1 - state 1.. etc.  Each state runs the cooresponding state function.  State_t defintion also contains an entry function pointer to run on trnasition from one state to the next.  
