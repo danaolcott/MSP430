@@ -19,70 +19,17 @@
 #include <stddef.h>
 #include <string.h>
 
+#include "main.h"
+#include "fsm.h"
+
 //prototypes
-void delay_ms(volatile int ticks);
+
 void TimeDelay_Decrement(void);
 void GPIO_init(void);
 void TimerA_init(void);
 void Interrupt_init(void);
 
 void WasteCPU(void);
-
-void LedRed_Toggle(void);
-void LedRed_Set(void);
-void LedRed_Clear(void);
-void LedGreen_Toggle(void);
-void LedGreen_Set(void);
-void LedGreen_Clear(void);
-
-
-//////////////////////////////////////////
-//FSM state functions
-void LED_Flash0(void);
-void LED_Flash1(void);
-void LED_Flash2(void);
-void LED_Flash3(void);
-
-
-void LED_Flash0_entry(void);
-void LED_Flash1_entry(void);
-void LED_Flash2_entry(void);
-void LED_Flash3_entry(void);
-
-
-
-#define FSM_NUM_STATES			4
-
-typedef enum
-{
-	STATE0 = 0,
-	STATE1 = 1,
-	STATE2 = 2,
-	STATE3 = 3,
-}StateName_t;
-
-
-typedef struct
-{
-	StateName_t name;
-	uint16_t delay;
-	void (*fptr)(void);							//function to run
-	void (*entryPtr)(void);						//entry function to run
-	StateName_t nextState[FSM_NUM_STATES];
-}State_t;
-
-
-State_t fsm[FSM_NUM_STATES] =
-{
-		{STATE0, 10, LED_Flash0, LED_Flash0_entry, {STATE0, STATE1, STATE2, STATE3}},
-		{STATE1, 10, LED_Flash1, LED_Flash1_entry, {STATE0, STATE1, STATE2, STATE3}},
-		{STATE2, 10, LED_Flash2, LED_Flash2_entry, {STATE0, STATE1, STATE2, STATE3}},
-		{STATE3, 10, LED_Flash3, LED_Flash3_entry, {STATE0, STATE1, STATE2, STATE3}},
-};
-
-static volatile StateName_t flashState = STATE0;
-static State_t currentState;
-static State_t lastState;
 
 
 //global variables
@@ -102,26 +49,9 @@ void main(void)
 	LedRed_Clear();
 	LedGreen_Clear();
 
-	currentState = fsm[flashState];
-	lastState = fsm[FSM_NUM_STATES -1];	//set to force update on first run
+	//should never return
+	FSM_Run();
 
-	//main loop
-	while(1)
-	{
-		StateName_t next = currentState.nextState[flashState];
-		currentState = fsm[next];
-
-		//state change?
-		if(lastState.name != currentState.name)
-			currentState.entryPtr();
-
-		//run the state function
-		currentState.fptr();
-		delay_ms(currentState.delay);
-
-		//update last state
-		lastState = fsm[next];
-	}
 }
 
 
@@ -263,21 +193,26 @@ __interrupt void Timer_A(void)
 
 /////////////////////////////////////
 //P1 ISR for the user button
+//Update input value to the fsm
+//and send to the fsm, takes on
+//values from 0 to 3
+//
 #pragma vector = PORT1_VECTOR
 __interrupt void Port_1(void)
 {
+	static uint8_t fsmValue = 0;
 	WasteCPU();
 
 	//still pressed...
 	if(!(P1IN & BIT3))
 	{
-		//increase the flash state
-		if (flashState < STATE3)
-			flashState++;
+		if (fsmValue < 3)
+			fsmValue++;
 		else
-			flashState = STATE0;
-	}
+			fsmValue = 0;
 
+		FSM_SetInputValue(fsmValue);
+	}
 
 	//clear the interrupt flag - button
 	P1IFG &=~ BIT3;
@@ -293,101 +228,4 @@ void WasteCPU(void)
 
 
 
-
-
-void LED_Flash0_entry(void)
-{
-	int i;
-	for (i = 0 ; i < 10; i++)
-	{
-		LedRed_Toggle();
-		delay_ms(50);
-	}
-}
-
-void LED_Flash1_entry(void)
-{
-	int i;
-	for (i = 0 ; i < 10; i++)
-	{
-		LedGreen_Toggle();
-		delay_ms(50);
-	}
-}
-
-void LED_Flash2_entry(void)
-{
-	int i;
-	for (i = 0 ; i < 10; i++)
-	{
-		LedRed_Toggle();
-		LedGreen_Toggle();
-
-		delay_ms(50);
-	}
-}
-
-void LED_Flash3_entry(void)
-{
-	int i;
-	for (i = 0 ; i < 10; i++)
-	{
-		LedRed_Toggle();
-		LedGreen_Toggle();
-		delay_ms(50);
-	}
-}
-
-
-
-
-///////////////////////////////
-//red
-void LED_Flash0(void)
-{
-	LedRed_Set();
-	delay_ms(100);
-	LedRed_Clear();
-	delay_ms(100);
-}
-
-///////////////////////////////
-//green
-void LED_Flash1(void)
-{
-	LedGreen_Set();
-	delay_ms(100);
-
-	LedGreen_Clear();
-	delay_ms(100);
-}
-
-///////////////////////////////
-//red and green - same
-void LED_Flash2(void)
-{
-	LedRed_Set();
-	LedGreen_Set();
-	delay_ms(100);
-
-	LedRed_Clear();
-	LedGreen_Clear();
-	delay_ms(100);
-
-
-}
-
-///////////////////////////////
-//red and green - alt
-void LED_Flash3(void)
-{
-	LedRed_Set();
-	LedGreen_Set();
-	delay_ms(500);
-
-	LedRed_Clear();
-	LedGreen_Clear();
-	delay_ms(500);
-
-}
 
