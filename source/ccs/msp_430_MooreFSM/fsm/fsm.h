@@ -15,6 +15,8 @@
 //
 #define FSM_NUM_STATES			4
 
+//state names - value cooresponds to
+//the index of the fsm state table.
 typedef enum
 {
 	STATE0 = 0,

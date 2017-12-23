@@ -3,6 +3,14 @@
  *
  *  Created on: Dec 22, 2017
  *      Author: danao
+ *
+ *  A Simple Moore State Machine.
+ *
+ *  The fsm contains 4 states.  Each state has an
+ *  entry and continuous run function.  The current
+ *  state is updated from the outside world using
+ *  FSM_SetState function.  The state table is defined
+ *  below.
  */
 #include <stdint.h>
 #include <stddef.h>
@@ -13,8 +21,6 @@
 
 
 static volatile StateName_t flashState = STATE0;
-static State_t currentState;
-static State_t lastState;
 
 //////////////////////////////////
 //State Functions - entry - run
@@ -34,7 +40,7 @@ static void LED_Flash3(void);
 
 
 
-static State_t fsm[FSM_NUM_STATES] =
+static const State_t fsm[FSM_NUM_STATES] =
 {
 		{STATE0, 10, LED_Flash0, LED_Flash0_entry, {STATE0, STATE1, STATE2, STATE3}},
 		{STATE1, 10, LED_Flash1, LED_Flash1_entry, {STATE0, STATE1, STATE2, STATE3}},
@@ -54,8 +60,8 @@ void FSM_SetInputValue(uint8_t value)
 
 void FSM_Run(void)
 {
-	currentState = fsm[flashState];
-	lastState = fsm[FSM_NUM_STATES -1];	//set to force update on first run
+	State_t currentState = fsm[flashState];
+	State_t lastState = fsm[FSM_NUM_STATES -1];	//set to force update on first run
 
 	//main loop
 	while(1)

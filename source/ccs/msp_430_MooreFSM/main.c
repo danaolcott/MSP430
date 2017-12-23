@@ -6,8 +6,7 @@
  * finite state machine with 4 states.  The input value
  * is updated from the user button isr and takes on a
  * value from 0 to 3.  Each state has a different flash
- * routine.
- *
+ * routine.  See fsm.c/.h for state defintions / functions.
  *
  *
  */
