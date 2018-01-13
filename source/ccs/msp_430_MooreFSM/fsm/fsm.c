@@ -42,9 +42,9 @@ static void LED_Flash3(void);
 
 static const State_t fsm[FSM_NUM_STATES] =
 {
-		{STATE0, 10, LED_Flash0, LED_Flash0_entry, {STATE0, STATE1, STATE2, STATE3}},
-		{STATE1, 10, LED_Flash1, LED_Flash1_entry, {STATE0, STATE1, STATE2, STATE3}},
-		{STATE2, 10, LED_Flash2, LED_Flash2_entry, {STATE0, STATE1, STATE2, STATE3}},
+		{STATE0, 10, LED_Flash0, LED_Flash0_entry, {STATE1, STATE2, STATE3, STATE0}},
+		{STATE1, 10, LED_Flash1, LED_Flash1_entry, {STATE2, STATE3, STATE3, STATE0}},
+		{STATE2, 10, LED_Flash2, LED_Flash2_entry, {STATE3, STATE0, STATE1, STATE2}},
 		{STATE3, 10, LED_Flash3, LED_Flash3_entry, {STATE0, STATE1, STATE2, STATE3}},
 };
 
