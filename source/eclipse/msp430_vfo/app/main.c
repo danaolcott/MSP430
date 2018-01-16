@@ -37,7 +37,8 @@
  *
  *
  *
-s */
+ */
+
 //includes
 #include <msp430.h>
 #include <stdio.h>
@@ -49,9 +50,12 @@ s */
 #include "spi.h"
 #include "si5351.h"
 #include "encoder.h"
+#include "task.h"
 
 
 //prototypes
+void dummyDelay(unsigned int delay);
+
 void delay_ms(volatile int ticks);
 void TimeDelay_Decrement(void);
 void GPIO_init(void);
@@ -59,10 +63,15 @@ void TimerA_init(void);
 void Interrupt_init(void);
 void LED_RED_TOGGLE(void);
 
+//Task Function Prototypes
+void TaskFunction_RxTask(void);
+void TaskFunction_LedTask(void);
+void TaskFunction_DisplayTask(void);
 
 //global variables
 static volatile int TimeDelay;
 
+static volatile uint8_t gDisplayMode;
 
 //main program
 int main(void)
@@ -74,21 +83,29 @@ int main(void)
 	GPIO_init();		//leds and buttons
 	Interrupt_init();	//button interrupts
 	spi_init();			//lcd
-	i2c_init();			//si5351
-	vfo_init();			//si5351
-	encoder_init();
+//	i2c_init();			//si5351			-temporarily disable
+//	vfo_init();			//si5351			-temporarily disable
+	encoder_init();		//rotary encoder
 
+	Task_Init();		//init the tasker
 
-	//main loop
-	while(1)
-	{
-		LED_RED_TOGGLE();
-		delay_ms(500);
-	}
+	Task_AddTask("rxTask", TaskFunction_RxTask, 50, 0);
+	Task_AddTask("led", TaskFunction_LedTask, 500, 1);
+	Task_AddTask("display", TaskFunction_DisplayTask, 200, 2);
+
+	//start the tasker - should not return from
+	//this function as it's a while loop
+	Task_StartScheduler();
 
 	return 0;
 }
 
+void dummyDelay(unsigned int delay)
+{
+	volatile unsigned int temp = delay;
+	while (temp > 0)
+		temp--;
+}
 
 ////////////////////////////////////////
 void delay_ms(volatile int ticks)
@@ -115,10 +132,8 @@ void TimeDelay_Decrement(void)
 //Note: SPIB conflicts with P1.6, so the green led does not work
 void GPIO_init(void)
 {
-	//setup bit 0 and 6 as output
-
+	//setup bit 0 as output
 	P1DIR |= BIT0;
-
 	P1OUT &=~ BIT0;		//turn off
 
 	//set up the user button bit 3
@@ -127,19 +142,17 @@ void GPIO_init(void)
 	P1REN |= BIT3;		//enable pullup/down
 	P1OUT |= BIT3;		//resistor set to pull up
 
-
-
 }
 
 /////////////////////////////////////////
 //Sets up the timer And the frequency
 //of the clock, since the rate of overflow
 //is connected to this
-
+//
 void TimerA_init(void)
 {
 
-	//set the clock frequency to 16 mhz
+	//set the clock frequency 16 mhz
 	BCSCTL1 = CALBC1_16MHZ;
 	DCOCTL = CALDCO_16MHZ;
 
@@ -196,6 +209,8 @@ void LED_RED_TOGGLE(void)
 
 //////////////////////////////////////
 //TimerA ISR
+//Controls delay function and the
+//tick rate for the task timer.
 #pragma vector = TIMER0_A0_VECTOR
 __interrupt void Timer_A(void)
 {
@@ -204,6 +219,7 @@ __interrupt void Timer_A(void)
 
 	TimeDelay_Decrement();
 
+	Task_TimerISRHandler();
 }
 
 
@@ -212,10 +228,105 @@ __interrupt void Timer_A(void)
 #pragma vector = PORT1_VECTOR
 __interrupt void Port_1(void)
 {
+	//dummy delay
+	dummyDelay(2000);
+	if (!(P1IN & BIT3))
+	{
+		//send a message to rxTask - toggle
+		//send message to the receiver task with
+		TaskMessage msg;
+		msg.signal = TASK_SIG_USER_BUTTON;
+		msg.value = 0x00;
+		int index = Task_GetIndexFromName("rxTask");
+		Task_SendMessage(index, msg);
+
+	}
+
+
 	//clear the interrupt flag - button
 	P1IFG &=~ BIT3;
 
 	//do something....
+}
+
+
+
+////////////////////////////////////
+//Generic Receiver Task for all tasks
+//in the system.  Checks for messages
+//waiting and processes them.
+//
+void TaskFunction_RxTask(void)
+{
+	TaskMessage msg = {TASK_SIG_NONE, 0x00};
+	uint8_t index = Task_GetIndexFromName("rxTask");
+
+	while (Task_GetNextMessage(index, &msg) > 0)
+	{
+		switch(msg.signal)
+		{
+			case TASK_SIG_NONE:		break;
+			case TASK_SIG_ON:		break;
+			case TASK_SIG_OFF:		break;
+			case TASK_SIG_TOGGLE:	break;
+
+			case TASK_SIG_ENCODER_LEFT:
+			{
+				vfo_DecreaseChannel0Frequency();
+				break;
+			}
+			case TASK_SIG_ENCODER_RIGHT:
+			{
+				vfo_IncreaseChannel0Frequency();
+				break;
+			}
+			case TASK_SIG_USER_BUTTON:
+			{
+				P1OUT ^= BIT0;
+				break;
+			}
+
+			case TASK_SIG_LAST:		break;
+
+			default:
+				break;
+		}
+	}
+}
+
+
+
+
+
+////////////////////////////////////////
+//Task Functions - LED task
+//Function is run to completion
+//See task add function for task
+//frequency
+void TaskFunction_LedTask(void)
+{
+	LED_RED_TOGGLE();
+}
+
+
+////////////////////////////////////
+//DisplayTask -
+//Update the contents of the display
+//based on the display mode
+//
+void TaskFunction_DisplayTask(void)
+{
+	uint32_t freq = vfo_GetChannel0Frequency();
+
 
 }
+
+
+
+
+
+
+
+
+
 

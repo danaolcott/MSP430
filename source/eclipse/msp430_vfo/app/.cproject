@@ -32,6 +32,7 @@
 									<listOptionValue builtIn="false" value="../../spi"/>
 									<listOptionValue builtIn="false" value="../../si5351"/>
 									<listOptionValue builtIn="false" value="../../encoder"/>
+									<listOptionValue builtIn="false" value="../../task"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1738941858" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -88,6 +89,7 @@
 									<listOptionValue builtIn="false" value="../../../si5351"/>
 									<listOptionValue builtIn="false" value="../../../i2c"/>
 									<listOptionValue builtIn="false" value="../../encoder"/>
+									<listOptionValue builtIn="false" value="../../task"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1514011790" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>

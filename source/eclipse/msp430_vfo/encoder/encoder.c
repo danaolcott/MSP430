@@ -13,6 +13,7 @@ P2.0 and P2.1
 #include <msp430.h>
 #include "encoder.h"
 #include "si5351.h"
+#include "task.h"
 
 
 static uint8_t encoderCurrentState;
@@ -144,15 +145,26 @@ __interrupt void Port_2(void)
 	//dummy delay - kill a few cpu cycles
 	encoder_delay(1000);
 
-	//get the encoder direction
+	//get the encoder direction - read bits
+	//and compare with last location
 	EncoderDirection_t dir = encoder_getDirection();
 
-	//pass the direction on to si5351 - this should be in
-	//a receiver task, increase the freq, update the display,... etc
+	//send message to the receiver task with
+	//TASK_SIG_###
+	TaskMessage msg;
+	msg.signal = TASK_SIG_ENCODER_LEFT;
+	msg.value = 0x00;
+
 	if (dir == ENCODER_DIR_LEFT)
-		vfo_DecreaseChannel0Frequency();
+		msg.signal = TASK_SIG_ENCODER_LEFT;
 	else if (dir == ENCODER_DIR_RIGHT)
-		vfo_IncreaseChannel0Frequency();
+		msg.signal = TASK_SIG_ENCODER_RIGHT;
+
+	int index = Task_GetIndexFromName("rxTask");
+
+	Task_SendMessage(index, msg);
+
+
 
 	//clear the interrupt flags
 	P2IFG &=~ BIT0;
