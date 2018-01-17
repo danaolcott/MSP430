@@ -297,7 +297,6 @@ int Task_ClearAllMessages(uint8_t element)
 		for (i = 0 ; i < TASK_MESSAGE_SIZE ; i++)
 		{
 			TaskTable[element].taskMessage[i].signal = TASK_SIG_NONE;
-			TaskTable[element].taskMessage[i].value = 0x00;
 		}
 
 		return 1;
@@ -323,7 +322,6 @@ int Task_SendMessage(uint8_t index, TaskMessage message)
 				(TaskTable[index].flagEnable == 1))
 		{
 			TaskTable[index].taskMessage[TaskTable[index].taskMessageWaiting].signal = message.signal;
-			TaskTable[index].taskMessage[TaskTable[index].taskMessageWaiting].value = message.value;
 			TaskTable[index].taskMessageWaiting++;
 
 			return TaskTable[index].taskMessageWaiting;
@@ -361,7 +359,6 @@ int Task_GetNextMessage(uint8_t index, TaskMessage *msg)
 		if (TaskTable[index].taskMessageWaiting > 0)
 		{
 			msg->signal = TaskTable[index].taskMessage[TaskTable[index].taskMessageWaiting - 1].signal;
-			msg->value = TaskTable[index].taskMessage[TaskTable[index].taskMessageWaiting - 1].value;
 
 			//post decrement if using a while loop on reader side
 			return TaskTable[index].taskMessageWaiting--;

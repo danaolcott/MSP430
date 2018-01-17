@@ -123,7 +123,7 @@ void vfo_init(void)
 	vfo_SetChannelState(VFO_CHANNEL_2, VFO_STATE_ENABLE);
 	vfo_SetChannelDrive(VFO_DRIVE_STRENGTH_8MA);
 
-	vfo_SetChannel0Frequency(gClockFrequency);
+	//vfo_SetChannel0Frequency(gClockFrequency);
 
 }
 
@@ -142,6 +142,74 @@ void vfo_init(void)
 // and MultiSynth 0
 // and produces the output on CLK0
 //
+void vfo_SetChannel0Frequency(uint32_t frequency)
+{
+	uint32_t pllFreq;
+	uint32_t xtalFreq = XTAL_FREQ;
+	uint32_t l;
+	float f;
+	uint8_t mult;
+	uint32_t num;
+	uint32_t denom;
+	uint32_t divider;
+
+	gClockFrequency = frequency;
+
+	///////////////////////////////////////////////
+	//Scale the input frequency based on radio
+	//receiver readings.  use the following
+	//and add a bit extra
+	//	1 * f   +  76/1000 * f + 29010
+
+	frequency = frequency + (76 * frequency / 1000) + 2000 + 29010;
+//	uint32_t extra = 2000;
+//	uint32_t fUpdated = frequency + (76 * frequency / 1000) + extra + 29010;
+
+//	frequency = fUpdated;
+
+	divider = 900000000 / frequency;// Calculate the division ratio. 900,000,000 is the maximum internal
+									// PLL frequency: 900MHz
+	if (divider % 2) divider--;		// Ensure an even integer division ratio
+
+	pllFreq = divider * frequency;	// Calculate the pllFrequency: the divider * desired output frequency
+
+	mult = pllFreq / xtalFreq;		// Determine the multiplier to get to the required pllFrequency
+	l = pllFreq % xtalFreq;			// It has three parts:
+	f = l;							// mult is an integer that must be in the range 15..90
+	f *= 1048575;					// num and denom are the fractional parts, the numerator and denominator
+	f /= xtalFreq;					// each is 20 bits (range 0..1048575)
+	num = f;						// the actual multiplier is  mult + num / denom
+	denom = 1048575;				// For simplicity we set the denominator to the maximum 1048575
+
+	// Set up PLL A with the calculated multiplication ratio
+	SetupPLL(SI_SYNTH_PLL_A, mult, num, denom);
+
+	// Set up MultiSynth divider 0, with the calculated divider.
+	// The final R division stage can divide by a power of two, from 1..128.
+	// reprented by constants SI_R_DIV1 to SI_R_DIV128 (see si5351a.h header file)
+	// If you want to output frequencies below 1MHz, you have to use the
+	// final R division stage
+	SetupMultisynth(SI_SYNTH_MS_0, divider, SI_R_DIV_1);
+
+	// Reset the PLL. This causes a glitch in the output. For small changes to
+	// the parameters, you don't need to reset the PLL, and there is no glitch
+	vfo_resetPLL();
+
+}
+
+
+
+
+
+
+
+
+/*
+///////////////////////////////////////////////////
+frequency function - tested and works on the
+stm32f411 processor. Calling this function on
+the msp430 seems to crash it.  stack size?
+
 void vfo_SetChannel0Frequency(uint32_t frequency)
 {
 	uint32_t pllFreq;
@@ -195,6 +263,11 @@ void vfo_SetChannel0Frequency(uint32_t frequency)
 }
 
 
+*/
+
+
+
+
 ///////////////////////////////////////////
 //returns the current frequency stored.
 uint32_t vfo_GetChannel0Frequency(void)
@@ -205,13 +278,13 @@ uint32_t vfo_GetChannel0Frequency(void)
 
 void vfo_IncreaseChannel0Frequency(void)
 {
-	gClockFrequency += 1000;
+	gClockFrequency += 10000;
 	vfo_SetChannel0Frequency(gClockFrequency);
 }
 
 void vfo_DecreaseChannel0Frequency(void)
 {
-	gClockFrequency -= 1000;
+	gClockFrequency -= 10000;
 	vfo_SetChannel0Frequency(gClockFrequency);
 }
 
@@ -318,7 +391,8 @@ uint8_t vfo_GetInitStatus(void)
 {
 	uint8_t val = 0x00;
 	vfo_readReg(VFO_STATUS_REG, &val);
-	return (val & VFO_STATUS_BIT);
+	val = (val >> 7) & 0x01;
+	return val;
 }
 
 uint8_t vfo_GetPLLAStatus(void)

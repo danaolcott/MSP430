@@ -23,6 +23,10 @@
  * Button on P1.3 - toggle display states
  * Rotary Encoder - P2.0, P2.1 - 2 bits - interrupted
  *
+ * LCD Control lines - P2.3, P2.4 for reset and cmd/data
+ * LCD is the Nokia 84x48 display with simple functions for
+ * clear and text (no frame buffer for graphics)
+ *
  * All of P1.x is consumed. Pins available on Port2:
  * P2.0, P2.1, P2.2, P2.3, P2.4, P2.5
  *
@@ -33,7 +37,11 @@
  * read the state and get the direction ffrom function that saves
  * last state.  Update freq
  *
- * simple state machine or tasker?
+ * Control the program using the simple tasker
+ *
+ * NOTE:
+ * msp430-readelf: useful tool
+ *
  *
  *
  *
@@ -47,11 +55,10 @@
 #include <string.h>
 
 #include "i2c.h"
-#include "spi.h"
 #include "si5351.h"
 #include "encoder.h"
 #include "task.h"
-
+#include "nokia.h"
 
 //prototypes
 void dummyDelay(unsigned int delay);
@@ -70,7 +77,6 @@ void TaskFunction_DisplayTask(void);
 
 //global variables
 static volatile int TimeDelay;
-
 static volatile uint8_t gDisplayMode;
 
 //main program
@@ -82,14 +88,46 @@ int main(void)
 	TimerA_init();
 	GPIO_init();		//leds and buttons
 	Interrupt_init();	//button interrupts
-	spi_init();			//lcd
-//	i2c_init();			//si5351			-temporarily disable
-//	vfo_init();			//si5351			-temporarily disable
+	LCD_init();			//configure pins (p2.3 and 2.4) and registers
+	i2c_init();			//si5351			-temporarily disable
+
+	//wait a bit for vfo to power up
+	delay_ms(50);
+
+	//wait for the vfo to power up before
+	//initializing
+	//returns 1 if not powered up
+	while (vfo_GetInitStatus())
+	{
+		delay_ms(10);
+	}
+
+	if (!vfo_GetInitStatus())
+		vfo_init();			//si5351			-temporarily disable
+
+	delay_ms(50);
+
 	encoder_init();		//rotary encoder
+
+	//set the initial frequency
+	vfo_SetChannel0Frequency(7000000);
+
+	//display initial startup routine on the lcd
+	LCD_Clear(0x00);
+	LCD_WriteString(0, "Line1");
+	LCD_WriteString(1, "Line2");
+	LCD_WriteString(2, "Line3");
+	LCD_WriteString(3, "Line4");
+	LCD_WriteString(4, "Line5");
+
+	delay_ms(2000);
+	LCD_Clear(0x00);
+
+
 
 	Task_Init();		//init the tasker
 
-	Task_AddTask("rxTask", TaskFunction_RxTask, 50, 0);
+	Task_AddTask("rxTask", TaskFunction_RxTask, 100, 0);
 	Task_AddTask("led", TaskFunction_LedTask, 500, 1);
 	Task_AddTask("display", TaskFunction_DisplayTask, 200, 2);
 
@@ -217,8 +255,10 @@ __interrupt void Timer_A(void)
 	//clear the timer interrupt
 	TACTL &=~ BIT0;
 
+	//time tick for delay_ms()
 	TimeDelay_Decrement();
 
+	//manage the tick for the tasker
 	Task_TimerISRHandler();
 }
 
@@ -236,7 +276,6 @@ __interrupt void Port_1(void)
 		//send message to the receiver task with
 		TaskMessage msg;
 		msg.signal = TASK_SIG_USER_BUTTON;
-		msg.value = 0x00;
 		int index = Task_GetIndexFromName("rxTask");
 		Task_SendMessage(index, msg);
 
@@ -258,7 +297,7 @@ __interrupt void Port_1(void)
 //
 void TaskFunction_RxTask(void)
 {
-	TaskMessage msg = {TASK_SIG_NONE, 0x00};
+	TaskMessage msg = {TASK_SIG_NONE};
 	uint8_t index = Task_GetIndexFromName("rxTask");
 
 	while (Task_GetNextMessage(index, &msg) > 0)
@@ -305,7 +344,26 @@ void TaskFunction_RxTask(void)
 //frequency
 void TaskFunction_LedTask(void)
 {
+	char buffer[12];
+	uint8_t len, i = 0;
+	for (i = 0 ; i < 12 ; i++)
+		buffer[i] = 0x00;
+
+	uint32_t freq = vfo_GetChannel0Frequency();
+
+	len = LCD_DecimaltoBuffer(freq, buffer, 12);
+
+	LCD_ClearRow(0, 0x00);
+	LCD_ClearRow(1, 0x00);
+
+	LCD_WriteString(0, "CH1 (HZ):");
+	LCD_WriteStringLength(1, buffer, len);
+
+
+
 	LED_RED_TOGGLE();
+
+
 }
 
 

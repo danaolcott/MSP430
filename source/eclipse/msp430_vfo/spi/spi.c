@@ -34,6 +34,10 @@ void spi_init(void)
 	P1DIR |= SPI_CS_PIN;
 	P1OUT |= SPI_CS_PIN;
 
+
+
+
+
     //SPI A setup routine.  Start by holding the
     //USCI in reset state while setting up registers
     UCB0CTL1 = UCSWRST;
@@ -60,21 +64,22 @@ void spi_init(void)
 
 //    UCA0CTL0 |= UCCKPL + UCMSB + UCMST + UCSYNC;  // 3-pin, 8-bit SPI master
 
-    //from spi setup from demo radio files
-	UCA0CTL0  =  0x00+UCMST + UCSYNC + UCMODE_0 + UCMSB + UCCKPH;
-    //clock control - USCI clock source. 1 - aclock, 2 smclock
-    //3 smclock
-    UCA0CTL1 |= UCSSEL_2;                     // SMCLK
+    UCA0CTL0 |= UCCKPH + UCMSB + UCMST + UCSYNC;  // 3-pin, 8-bit SPI master
 
-    //bit rate control register - two registers
-    //high bytes on BR1, low bytes on BR0.  no need to set
-    //the BR1. seems to be up to 16 divider, so try 0x02, 0x04
-    //0x08, etc.  In theory, this could slow it down so we can
-    //run a higher clock speed but keep the bit generator slow
+	//clock control - USCI clock source. 1 - aclock, 2 smclock
+	//3 smclock
+	UCA0CTL1 |= UCSSEL_2;                     // SMCLK
 
-    UCA0BR0 |= 0x08;                          //prescaler 8 - low bits
-    UCA0BR1 = 0;                              //prescaler - high bits
-    UCA0MCTL = 0;                             //modulation - needed for SPIA
+
+	//bit rate control register - two registers
+	//high bytes on BR1, low bytes on BR0.  no need to set
+	//the BR1. seems to be up to 16 divider, so try 0x02, 0x04
+	//0x08, etc.  In theory, this could slow it down so we can
+	//run a higher clock speed but keep the bit generator slow
+	UCA0BR0 |= 0x40;                          //prescaler 64 - low bits
+	UCA0BR1 = 0;                              //prescaler - high bits
+	UCA0MCTL = 0;                             // No modulation, not sure ??
+
 
     //clear the bit to start the SPI module
     UCA0CTL1 &= ~UCSWRST;

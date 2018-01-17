@@ -6,6 +6,22 @@ Dana Olott
 Rotary Encoder Files
 P2.0 and P2.1
 
+Looking at the rotary encoder on the scope,
+Here's the bit pattern - CCW
+0	0
+0	1
+1	1
+1	0
+0	0...
+
+Bit Pattern - CW
+0	0
+1	0
+1	1
+0	1
+0	0...
+
+
 */
 ////////////////////////////////////////////
 
@@ -37,6 +53,9 @@ void encoder_init(void)
 	P2DIR &=~ BIT1;		//input
 	P2REN |= BIT1;		//enable pullup/down
 	P2OUT |= BIT1;		//resistor set to pull up
+
+
+
 
     //encoder bits are on interrupts
 	//enable all the interrupts
@@ -80,41 +99,41 @@ EncoderDirection_t encoder_getDirection(void)
 
     switch(encoderLastState)
     {
-		case 0x00:		//3, 0, 1
-		{
-			if(encoderCurrentState == 0x03)
-				dir = ENCODER_DIR_LEFT;
-			else if(encoderLastState == 0x01)
-				dir = ENCODER_DIR_RIGHT;
-			else
-				dir = ENCODER_DIR_NONE;
-			break;
-		}
-		case 0x01:		//0, 1, 2
-		{
-			if(encoderCurrentState == 0x00)
-				dir = ENCODER_DIR_LEFT;
-			else if(encoderLastState == 0x02)
-				dir = ENCODER_DIR_RIGHT;
-			else
-				dir = ENCODER_DIR_NONE;
-			break;
-		}
-		case 0x02:		//1, 2, 3
+		case 0x00:		//1, 0, 2
 		{
 			if(encoderCurrentState == 0x01)
 				dir = ENCODER_DIR_LEFT;
-			else if(encoderLastState == 0x03)
+			else if(encoderCurrentState == 0x02)
 				dir = ENCODER_DIR_RIGHT;
 			else
 				dir = ENCODER_DIR_NONE;
 			break;
 		}
-		case 0x03:		//2, 3, 0
+		case 0x01:		//3, 1, 0
+		{
+			if(encoderCurrentState == 0x03)
+				dir = ENCODER_DIR_LEFT;
+			else if(encoderCurrentState == 0x00)
+				dir = ENCODER_DIR_RIGHT;
+			else
+				dir = ENCODER_DIR_NONE;
+			break;
+		}
+		case 0x02:		//0, 2, 3
+		{
+			if(encoderCurrentState == 0x00)
+				dir = ENCODER_DIR_LEFT;
+			else if(encoderCurrentState == 0x03)
+				dir = ENCODER_DIR_RIGHT;
+			else
+				dir = ENCODER_DIR_NONE;
+			break;
+		}
+		case 0x03:		//2, 3, 1
 		{
 			if(encoderCurrentState == 0x02)
 				dir = ENCODER_DIR_LEFT;
-			else if(encoderLastState == 0x00)
+			else if(encoderCurrentState == 0x01)
 				dir = ENCODER_DIR_RIGHT;
 			else
 				dir = ENCODER_DIR_NONE;
@@ -143,27 +162,31 @@ EncoderDirection_t encoder_getDirection(void)
 __interrupt void Port_2(void)
 {
 	//dummy delay - kill a few cpu cycles
-	encoder_delay(1000);
+	encoder_delay(2000);
 
 	//get the encoder direction - read bits
 	//and compare with last location
 	EncoderDirection_t dir = encoder_getDirection();
 
+	uint8_t okFlag = 1;
+
 	//send message to the receiver task with
 	//TASK_SIG_###
 	TaskMessage msg;
 	msg.signal = TASK_SIG_ENCODER_LEFT;
-	msg.value = 0x00;
 
 	if (dir == ENCODER_DIR_LEFT)
 		msg.signal = TASK_SIG_ENCODER_LEFT;
 	else if (dir == ENCODER_DIR_RIGHT)
 		msg.signal = TASK_SIG_ENCODER_RIGHT;
+	else
+		okFlag = 0;
 
-	int index = Task_GetIndexFromName("rxTask");
-
-	Task_SendMessage(index, msg);
-
+	if (okFlag == 1)
+	{
+		int index = Task_GetIndexFromName("rxTask");
+		Task_SendMessage(index, msg);
+	}
 
 
 	//clear the interrupt flags
