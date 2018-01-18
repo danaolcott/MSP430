@@ -21,15 +21,17 @@
  *
  * User Controls:
  * Button on P1.3 - toggle display states
- * Rotary Encoder - P2.0, P2.1 - 2 bits - interrupted
+ * Rotary Encoder - P2.3, P2.4 - 2 bits - interrupted
+ * Rotary Encoder - button, P2.5 - not interrupted,
+ * used for adjusting the freq. offset from tx/rx
  *
- * LCD Control lines - P2.3, P2.4 for reset and cmd/data
+ *
+ * LCD Control lines - P2.0, P2.1 for reset and cmd/data
  * LCD is the Nokia 84x48 display with simple functions for
  * clear and text (no frame buffer for graphics)
  *
- * All of P1.x is consumed. Pins available on Port2:
- * P2.0, P2.1, P2.2, P2.3, P2.4, P2.5
- *
+ * tx/rx switch - P2.2
+ *  *
  * encoder:
  * two outputs and a ground line.  Add 10k pullups to the
  * outputs, put caps from output to ground(? saw this somewhere)
@@ -64,8 +66,6 @@ Done, 14792 bytes total
 #include <msp430.h>
 #include <stdio.h>
 #include <stdint.h>
-#include <stddef.h>
-#include <string.h>
 
 #include "i2c.h"
 #include "si5351.h"
@@ -127,11 +127,11 @@ int main(void)
 
 	//display initial startup routine on the lcd
 	LCD_Clear(0x00);
-	LCD_WriteString(0, "Line1");
-	LCD_WriteString(1, "Line2");
-	LCD_WriteString(2, "Line3");
-	LCD_WriteString(3, "Line4");
-	LCD_WriteString(4, "Line5");
+	LCD_WriteString(0, 0, "Line1");
+	LCD_WriteString(1, 0, "Line2");
+	LCD_WriteString(2, 0, "Line3");
+	LCD_WriteString(3, 0, "Line4");
+	LCD_WriteString(4, 0, "Line5");
 
 	delay_ms(2000);
 	LCD_Clear(0x00);
@@ -180,7 +180,19 @@ void TimeDelay_Decrement(void)
 }
 
 //////////////////////////////////////
-//Note: SPIB conflicts with P1.6, so the green led does not work
+//Configure IO - LEDs and Buttons
+//See encoder, lcd, etc for other io
+//configuration.
+
+//P1.0 - red led, P1.3 user button
+//P2.2 - input -- tx/rx mode.
+//Default is high, enable pullup
+//no interrupt on P2.2, simply polled
+//in the display task
+//
+//Note: I2C conflicts with P1.6, so
+//green led does not work.
+
 void GPIO_init(void)
 {
 	//setup bit 0 as output
@@ -192,6 +204,13 @@ void GPIO_init(void)
 	P1DIR &=~ BIT3;		//input
 	P1REN |= BIT3;		//enable pullup/down
 	P1OUT |= BIT3;		//resistor set to pull up
+
+	//configure P2.2 as input - no interrupt
+	//ground the pin and it applies the rit
+	P2DIR &=~ BIT2;		//input
+	P2REN |= BIT2;		//enable pullup/down
+	P2OUT |= BIT2;		//resistor set to pull up
+
 
 }
 
@@ -321,12 +340,19 @@ void TaskFunction_RxTask(void)
 
 			case TASK_SIG_ENCODER_LEFT:
 			{
-				vfo_DecreaseChannel0Frequency();
+				if (P1IN & BIT3)
+					vfo_DecreaseChannel0Frequency();
+				else
+					vfo_DecreaseFreqOffset();
+
 				break;
 			}
 			case TASK_SIG_ENCODER_RIGHT:
 			{
-				vfo_IncreaseChannel0Frequency();
+				if (P1IN & BIT3)
+					vfo_IncreaseChannel0Frequency();
+				else
+					vfo_IncreaseFreqOffset();
 				break;
 			}
 			case TASK_SIG_USER_BUTTON:
@@ -379,23 +405,51 @@ void TaskFunction_DisplayTask(void)
 
 	len = LCD_DecimaltoBuffer(freq, buffer, 12);
 
+
 	LCD_ClearRow(0, 0x00);
 	LCD_ClearRow(1, 0x00);
 	LCD_ClearRow(2, 0x00);
 
-
-	LCD_WriteString(0, "CH1 (HZ):");
-	LCD_WriteStringLength(1, buffer, len);
+	LCD_WriteString(0, 0, "CH1 (HZ):");
+	LCD_WriteStringLength(1, 0, buffer, len);
 
 	switch(vfo_GetVFOIncrement())
 	{
-		case 1:		LCD_WriteString(2, "> 1 Hz");		break;
-		case 10:	LCD_WriteString(2, "> 10 Hz");		break;
-		case 100:	LCD_WriteString(2, "> 100 Hz");		break;
-		case 1000:	LCD_WriteString(2, "> 1000 Hz");	break;
-		case 10000:	LCD_WriteString(2, "> 10000 Hz");	break;
-		default:	LCD_WriteString(2, "> ERROR");		break;
+		case 1:		LCD_WriteString(2, 0, "> 1 Hz");		break;
+		case 10:	LCD_WriteString(2, 0, "> 10 Hz");		break;
+		case 100:	LCD_WriteString(2, 0, "> 100 Hz");		break;
+		case 1000:	LCD_WriteString(2, 0, "> 1000 Hz");		break;
+		case 10000:	LCD_WriteString(2, 0, "> 10000 Hz");	break;
+		default:	LCD_WriteString(2, 0, "> ERROR");		break;
 	}
+
+	////////////////////////////////
+	//display the rit
+	LCD_WriteString(4, 0, ">RIT<");
+
+	for (i = 0 ; i < 12 ; i++)
+		buffer[i] = 0x00;
+
+	uint16_t offset = vfo_GetFreqOffset();
+
+	//display a negative offset
+	if (offset < VFO_FREQ_OFFSET_CENTER)
+	{
+		len = LCD_DecimaltoBuffer(VFO_FREQ_OFFSET_CENTER - offset, buffer, 12);
+		LCD_ClearRow(5, 0x00);
+		LCD_DrawChar(5, 0, '-');
+		LCD_WriteStringLength(5, 2, buffer, len);
+	}
+	else
+	{
+		len = LCD_DecimaltoBuffer(offset - VFO_FREQ_OFFSET_CENTER, buffer, 12);
+		LCD_ClearRow(5, 0x00);
+		LCD_DrawChar(5, 0, '+');
+		LCD_WriteStringLength(5, 2, buffer, len);
+	}
+
+
+
 
 
 }

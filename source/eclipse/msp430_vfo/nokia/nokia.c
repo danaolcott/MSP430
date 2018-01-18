@@ -20,9 +20,9 @@ clearing and simple text.
 
 ////////////////////////////////////////
 //
-void LCD_DummyDelay(unsigned int delay)
+void LCD_DummyDelay(uint16_t delay)
 {
-    volatile unsigned int temp = delay;
+    volatile uint16_t temp = delay;
 
     while (temp > 0)
         temp--;
@@ -221,25 +221,21 @@ void LCD_SetColumn(uint8_t col)
 //LCD_Clear(uint8_t)
 void LCD_Clear(uint8_t value)
 {
-	//reset to home
+	uint16_t count = LCD_NUM_PIXELS;
 	LCD_SetRow(0);
 	LCD_SetColumn(0);
 
-	int i, j;
-	for (i = 0 ; i < 6 ; i++)
+	while (count > 0)
 	{
-		for (j = 0 ; j < 84 ; j++)
-		{
-			LCD_WriteData(value);
-		}
+		LCD_WriteData(value);
+		count--;
 	}
 }
 
 
 void LCD_ClearRow(uint8_t row, uint8_t value)
 {
-	uint8_t count = 84;
-
+	uint8_t count = LCD_WIDTH;
 	if (row <= LCD_MAX_ROW)
 	{
 		LCD_SetRow(row);
@@ -328,14 +324,14 @@ void LCD_DrawChar(uint8_t row, uint8_t col, uint8_t letter)
 ///////////////////////////////////////////
 //write string at a given row location
 //valid rows from 0 to 5, start at col zero
-void LCD_WriteString(uint8_t row, const char* mystring)
+void LCD_WriteString(uint8_t row, uint8_t col, const char* mystring)
 {
 	//only write the first 10 values in mystring
 	uint8_t count = 0;
 
-	while ((mystring[count] != '\0') && (count <= 10))
+	while ((mystring[count] != '\0') && ((count + col) <= 10))
 	{
-		LCD_DrawChar(row, count, mystring[count]);
+		LCD_DrawChar(row, count + col, mystring[count]);
 		count++;
 	}
 }
@@ -343,12 +339,14 @@ void LCD_WriteString(uint8_t row, const char* mystring)
 //////////////////////////////////////////////////
 //Draw buffer to display starting at x offset
 //0, row = row, num chars = len
-void LCD_WriteStringLength(uint8_t row, char* buffer, uint8_t len)
+void LCD_WriteStringLength(uint8_t row, uint8_t col, char* buffer, uint8_t len)
 {
 	uint8_t i = 0;
-	for (i = 0 ; i < len ; i++)
+
+	if ((col + len) < LCD_MAX_COL)
 	{
-		LCD_DrawChar(row, i, buffer[i]);
+		for (i = 0 ; i < len ; i++)
+			LCD_DrawChar(row, i + col, buffer[i]);
 	}
 }
 

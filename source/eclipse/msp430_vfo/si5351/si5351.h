@@ -50,6 +50,12 @@
 
 #define XTAL_FREQ	27000000			// Crystal frequency
 
+//freq. offset adjustments - press the encoder button and adjust
+#define VFO_FREQ_OFFSET_CENTER		1000	//center freq
+#define VFO_FREQ_OFFSET_INC			10
+#define VFO_MIN_FREQ_OFFSET			0
+#define VFO_MAX_FREQ_OFFSET			2000
+#define VFO_DEFAULT_FREQ_OFFSET		1600
 
 
 typedef enum
@@ -74,15 +80,6 @@ typedef enum
 }VFODriveStrength_t;
 
 
-typedef enum
-{
-	VFO_INCREMENT_1HZ,
-	VFO_INCREMENT_10HZ,
-	VFO_INCREMENT_100HZ,
-	VFO_INCREMENT_1000HZ,
-	VFO_INCREMENT_10000HZ,
-}VFOIncrement_t;
-
 
 void vfo_init(void);
 void vfo_SetChannel0Frequency(uint32_t frequency);
@@ -91,6 +88,9 @@ uint32_t vfo_GetChannel0Frequency(void);
 void vfo_IncreaseChannel0Frequency(void);
 void vfo_DecreaseChannel0Frequency(void);
 
+uint16_t vfo_GetFreqOffset(void);
+void vfo_IncreaseFreqOffset(void);
+void vfo_DecreaseFreqOffset(void);
 
 
 void vfo_SetChannelDrive(VFODriveStrength_t drive);
@@ -99,7 +99,6 @@ void vfo_SetChannelState(VFOChannel_t ch, VFOState_t state);
 uint16_t vfo_GetVFOIncrement(void);
 uint16_t vfo_IncreaseVFOIncrement(void);
 uint16_t vfo_DecreaseVFOIncrement(void);
-
 
 uint8_t vfo_GetInitStatus(void);
 uint8_t vfo_GetPLLAStatus(void);

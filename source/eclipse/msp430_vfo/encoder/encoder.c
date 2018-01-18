@@ -201,7 +201,6 @@ __interrupt void Port_2(void)
 		Task_SendMessage(index, msg);
 	}
 
-
 	//clear the interrupt flags
 	P2IFG &=~ ENCODER_BIT0_PIN;
 	P2IFG &=~ ENCODER_BIT1_PIN;

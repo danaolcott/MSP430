@@ -25,7 +25,6 @@ the si5351 i2c communcation interface.
 #define I2C_BUS_PRESCALE		((uint8_t)(0x28))	//400khz
 //#define I2C_BUS_PRESCALE		((uint8_t)(0xA0))	//100khz
 
-
 void i2c_init(void);
 void i2c_write(uint8_t* data, uint8_t len);
 void i2c_read(uint8_t* data, uint8_t len);

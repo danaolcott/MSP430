@@ -62,6 +62,10 @@ input			actual
 static uint32_t gClockFrequency = 0x00;
 static uint16_t gVFOIncrement = 1;
 
+static uint16_t gVFOOffset = 1600;		//freq offset from tx/rx
+
+
+
 /////////////////////////////////////////////////
 //helper functions
 static void vfo_writeReg(uint8_t reg, uint8_t data);
@@ -295,6 +299,23 @@ void vfo_DecreaseChannel0Frequency(void)
 	vfo_SetChannel0Frequency(gClockFrequency);
 }
 
+
+uint16_t vfo_GetFreqOffset(void)
+{
+	return gVFOOffset;
+}
+
+void vfo_IncreaseFreqOffset(void)
+{
+	if (gVFOOffset < (VFO_MAX_FREQ_OFFSET - VFO_FREQ_OFFSET_INC))
+		gVFOOffset += VFO_FREQ_OFFSET_INC;
+}
+
+void vfo_DecreaseFreqOffset(void)
+{
+	if (gVFOOffset > (VFO_MIN_FREQ_OFFSET + VFO_FREQ_OFFSET_INC))
+		gVFOOffset -= VFO_FREQ_OFFSET_INC;
+}
 
 
 /////////////////////////////////////////////////

@@ -68,10 +68,10 @@ time the task runs.
 
 #include <stdint.h>			//uint32_t..etc
 
-#define TASK_MAX_TASK		4		//max number of tasks
+#define TASK_MAX_TASK		3		//max number of tasks
 #define NULL_PTR			((void *)0)
 #define TASK_NAME_LENGTH	8		//num chars in the name - max
-#define TASK_MESSAGE_SIZE	8		//max messages in the msg queue
+#define TASK_MESSAGE_SIZE	6		//max messages in the msg queue
 
 
 
