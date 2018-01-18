@@ -127,15 +127,15 @@ int main(void)
 
 	//display initial startup routine on the lcd
 	LCD_Clear(0x00);
-	LCD_WriteString(0, 0, "Line1");
-	LCD_WriteString(1, 0, "Line2");
-	LCD_WriteString(2, 0, "Line3");
-	LCD_WriteString(3, 0, "Line4");
-	LCD_WriteString(4, 0, "Line5");
+	LCD_WriteString(0, 0, "==========");
+	LCD_WriteString(1, 0, "QRP RIG");
+	LCD_WriteString(2, 0, "~10mW");
+	LCD_WriteString(3, 0, "--BOATS--");
+	LCD_WriteString(4, 3, "&");
+	LCD_WriteString(5, 0, " -HOES-");
 
 	delay_ms(2000);
 	LCD_Clear(0x00);
-
 
 
 	Task_Init();		//init the tasker
@@ -198,6 +198,10 @@ void GPIO_init(void)
 	//setup bit 0 as output
 	P1DIR |= BIT0;
 	P1OUT &=~ BIT0;		//turn off
+
+	//configure P1.1 as output - use green led
+	P1DIR |= BIT1;
+	P1OUT &=~ BIT1;
 
 	//set up the user button bit 3
 	//as input with pull up enabled
@@ -324,10 +328,16 @@ __interrupt void Port_1(void)
 //in the system.  Checks for messages
 //waiting and processes them.
 //
+//NOTE: Also polls the state of the rit
+//switch and sends to the si5351
+//
 void TaskFunction_RxTask(void)
 {
 	TaskMessage msg = {TASK_SIG_NONE};
 	uint8_t index = Task_GetIndexFromName("rxTask");
+
+	vfo_RIT_SetRIT(((P2IN & BIT2) >> 2));
+
 
 	while (Task_GetNextMessage(index, &msg) > 0)
 	{
@@ -344,7 +354,6 @@ void TaskFunction_RxTask(void)
 					vfo_DecreaseChannel0Frequency();
 				else
 					vfo_DecreaseFreqOffset();
-
 				break;
 			}
 			case TASK_SIG_ENCODER_RIGHT:
@@ -359,7 +368,6 @@ void TaskFunction_RxTask(void)
 			{
 				P1OUT ^= BIT0;
 				vfo_IncreaseVFOIncrement();
-
 				break;
 			}
 
@@ -382,10 +390,7 @@ void TaskFunction_RxTask(void)
 //frequency
 void TaskFunction_LedTask(void)
 {
-
 	LED_RED_TOGGLE();
-
-
 }
 
 
@@ -402,9 +407,12 @@ void TaskFunction_DisplayTask(void)
 		buffer[i] = 0x00;
 
 	uint32_t freq = vfo_GetChannel0Frequency();
+	uint16_t offset = vfo_GetFreqOffset();
 
-	len = LCD_DecimaltoBuffer(freq, buffer, 12);
-
+	if (vfo_RIT_GetRIT() == 1)
+		len = LCD_DecimaltoBuffer(freq + offset - VFO_FREQ_OFFSET_CENTER, buffer, 12);
+	else
+		len = LCD_DecimaltoBuffer(freq, buffer, 12);
 
 	LCD_ClearRow(0, 0x00);
 	LCD_ClearRow(1, 0x00);
@@ -425,12 +433,15 @@ void TaskFunction_DisplayTask(void)
 
 	////////////////////////////////
 	//display the rit
-	LCD_WriteString(4, 0, ">RIT<");
+	if (vfo_RIT_GetRIT() == 1)
+		LCD_WriteString(4, 0, "RIT ON  ");
+	else
+		LCD_WriteString(4, 0, "RIT OFF");
+
 
 	for (i = 0 ; i < 12 ; i++)
 		buffer[i] = 0x00;
 
-	uint16_t offset = vfo_GetFreqOffset();
 
 	//display a negative offset
 	if (offset < VFO_FREQ_OFFSET_CENTER)
@@ -447,9 +458,6 @@ void TaskFunction_DisplayTask(void)
 		LCD_DrawChar(5, 0, '+');
 		LCD_WriteStringLength(5, 2, buffer, len);
 	}
-
-
-
 
 
 }

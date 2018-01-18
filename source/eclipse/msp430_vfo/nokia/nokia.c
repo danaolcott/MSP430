@@ -16,6 +16,9 @@ clearing and simple text.
 #include "nokia.h"
 #include "font.h"
 
+#define SPI_OUTPUT_ONLY		1
+
+
 
 
 ////////////////////////////////////////
@@ -95,12 +98,23 @@ void LCD_SPI_init(void)
     //USCI in reset state while setting up registers
     UCB0CTL1 = UCSWRST;
 
+    //NOTE: Don't use BIT1 - not needed, display is one
+    //direction...
+
+
     //* P1.1 - UCA0SOMI	- slave out, master in
     //* P1.2 - UCA0SIMO - slave in master out
     //* P1.4 - UCA0CLK - serial clock
-
+#if(SPI_OUTPUT_ONLY == 1)
+    P1SEL |= BIT2 | BIT4;
+    P1SEL2 |= BIT2 | BIT4;
+#else
     P1SEL |= BIT1 | BIT2 | BIT4;
     P1SEL2 |= BIT1 | BIT2 | BIT4;
+#endif
+
+
+
 
     //set all the registers while the UCSWRST bit is high
     //see page 445 of the programmers manual

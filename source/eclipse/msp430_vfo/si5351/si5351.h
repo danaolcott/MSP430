@@ -92,6 +92,8 @@ uint16_t vfo_GetFreqOffset(void);
 void vfo_IncreaseFreqOffset(void);
 void vfo_DecreaseFreqOffset(void);
 
+void vfo_RIT_SetRIT(uint8_t rit);
+uint8_t vfo_RIT_GetRIT(void);
 
 void vfo_SetChannelDrive(VFODriveStrength_t drive);
 void vfo_SetChannelState(VFOChannel_t ch, VFOState_t state);
