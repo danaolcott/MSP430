@@ -43,6 +43,19 @@
  * msp430-readelf: useful tool
  *
  *
+ *before cleanup....
+
+ *Programming...
+Writing 4096 bytes at c000 [section: .text]...
+Writing 4096 bytes at d000 [section: .text]...
+Writing 4096 bytes at e000 [section: .text]...
+Writing 1276 bytes at f000 [section: .text]...
+Writing 1194 bytes at f4fc [section: .rodata]...
+Writing    2 bytes at f9a6 [section: .data]...
+Writing   32 bytes at ffe0 [section: .vectors]...
+Done, 14792 bytes total
+ *
+ *
  *
  *
  */
@@ -129,7 +142,7 @@ int main(void)
 
 	Task_AddTask("rxTask", TaskFunction_RxTask, 100, 0);
 	Task_AddTask("led", TaskFunction_LedTask, 500, 1);
-	Task_AddTask("display", TaskFunction_DisplayTask, 200, 2);
+	Task_AddTask("display", TaskFunction_DisplayTask, 500, 2);
 
 	//start the tasker - should not return from
 	//this function as it's a while loop
@@ -281,11 +294,8 @@ __interrupt void Port_1(void)
 
 	}
 
-
 	//clear the interrupt flag - button
 	P1IFG &=~ BIT3;
-
-	//do something....
 }
 
 
@@ -322,6 +332,8 @@ void TaskFunction_RxTask(void)
 			case TASK_SIG_USER_BUTTON:
 			{
 				P1OUT ^= BIT0;
+				vfo_IncreaseVFOIncrement();
+
 				break;
 			}
 
@@ -344,22 +356,6 @@ void TaskFunction_RxTask(void)
 //frequency
 void TaskFunction_LedTask(void)
 {
-	char buffer[12];
-	uint8_t len, i = 0;
-	for (i = 0 ; i < 12 ; i++)
-		buffer[i] = 0x00;
-
-	uint32_t freq = vfo_GetChannel0Frequency();
-
-	len = LCD_DecimaltoBuffer(freq, buffer, 12);
-
-	LCD_ClearRow(0, 0x00);
-	LCD_ClearRow(1, 0x00);
-
-	LCD_WriteString(0, "CH1 (HZ):");
-	LCD_WriteStringLength(1, buffer, len);
-
-
 
 	LED_RED_TOGGLE();
 
@@ -374,7 +370,32 @@ void TaskFunction_LedTask(void)
 //
 void TaskFunction_DisplayTask(void)
 {
+	char buffer[12];
+	uint8_t len, i = 0;
+	for (i = 0 ; i < 12 ; i++)
+		buffer[i] = 0x00;
+
 	uint32_t freq = vfo_GetChannel0Frequency();
+
+	len = LCD_DecimaltoBuffer(freq, buffer, 12);
+
+	LCD_ClearRow(0, 0x00);
+	LCD_ClearRow(1, 0x00);
+	LCD_ClearRow(2, 0x00);
+
+
+	LCD_WriteString(0, "CH1 (HZ):");
+	LCD_WriteStringLength(1, buffer, len);
+
+	switch(vfo_GetVFOIncrement())
+	{
+		case 1:		LCD_WriteString(2, "> 1 Hz");		break;
+		case 10:	LCD_WriteString(2, "> 10 Hz");		break;
+		case 100:	LCD_WriteString(2, "> 100 Hz");		break;
+		case 1000:	LCD_WriteString(2, "> 1000 Hz");	break;
+		case 10000:	LCD_WriteString(2, "> 10000 Hz");	break;
+		default:	LCD_WriteString(2, "> ERROR");		break;
+	}
 
 
 }

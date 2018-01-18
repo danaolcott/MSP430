@@ -8,6 +8,13 @@
 
 #include <stdint.h>
 
+#define ENCODER_BIT0_PIN		BIT3
+#define ENCODER_BIT1_PIN		BIT4
+#define ENCODER_BUTTON_PIN		BIT5
+
+
+
+
 typedef enum
 {
     ENCODER_DIR_LEFT,

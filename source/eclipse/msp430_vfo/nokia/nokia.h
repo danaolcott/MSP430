@@ -10,15 +10,15 @@ Nokia XXXXX 84x48 Graphic Display
 #include <msp430.h>
 
 
-#define LCD_DC_PIN              BIT3
-#define LCD_RESET_PIN           BIT4
-#define LCD_CS_PIN              BIT5
+#define LCD_DC_PIN              BIT0	//port2
+#define LCD_RESET_PIN           BIT1	//port2
+#define LCD_CS_PIN              BIT5	//port1
 
 
 #define LCD_WIDTH               84
 #define LCD_HEIGHT              48
 #define LCD_MAX_ROW             5
-#define LCD_MAX_COL             83
+#define LCD_MAX_COL             9
 
 
 void LCD_DummyDelay(unsigned int delay);

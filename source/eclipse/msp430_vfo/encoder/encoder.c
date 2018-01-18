@@ -42,30 +42,38 @@ void encoder_delay(uint16_t delay)
 		time--;
 }
 
-
+//////////////////////////////////////////
+//Rotary Encoder init
+//Configure Pins 2.3, 2.4, 2.5 as input
+//interrupted.  2.3/2.4 are used for the
+//left and right bits, 2.5 is the push
+//button.
 void encoder_init(void)
 {
-    //configure pins - p2.0, p2.1 as input, pullup
-	P2DIR &=~ BIT0;		//input
-	P2REN |= BIT0;		//enable pullup/down
-	P2OUT |= BIT0;		//resistor set to pull up
+	P2DIR &=~ ENCODER_BIT0_PIN;		//input
+	P2REN |= ENCODER_BIT0_PIN;		//enable pullup/down
+	P2OUT |= ENCODER_BIT0_PIN;		//resistor set to pull up
 
-	P2DIR &=~ BIT1;		//input
-	P2REN |= BIT1;		//enable pullup/down
-	P2OUT |= BIT1;		//resistor set to pull up
+	P2DIR &=~ ENCODER_BIT1_PIN;		//input
+	P2REN |= ENCODER_BIT1_PIN;		//enable pullup/down
+	P2OUT |= ENCODER_BIT1_PIN;		//resistor set to pull up
 
-
+	P2DIR &=~ ENCODER_BUTTON_PIN;		//input
+	P2REN |= ENCODER_BUTTON_PIN;		//enable pullup/down
+	P2OUT |= ENCODER_BUTTON_PIN;		//resistor set to pull up
 
 
     //encoder bits are on interrupts
 	//enable all the interrupts
 	__bis_SR_register(GIE);
 
-	P2IE |= BIT0;		//enable bit 0 interrupt
-	P2IE |= BIT1;		//enable bit 1 interrupt
+	P2IE |= ENCODER_BIT0_PIN;		//enable bit 0 interrupt
+	P2IE |= ENCODER_BIT1_PIN;		//enable bit 1 interrupt
+	P2IE |= ENCODER_BUTTON_PIN;		//enable bit 1 interrupt
 
-	P2IFG &=~ BIT0;		//clear the flag
-	P2IFG &=~ BIT1;		//clear the flag
+	P2IFG &=~ ENCODER_BIT0_PIN;		//clear the flag
+	P2IFG &=~ ENCODER_BIT1_PIN;		//clear the flag
+	P2IFG &=~ ENCODER_BUTTON_PIN;		//clear the flag
 
     encoderCurrentState = encoder_read();
     encoderLastState = encoder_read();
@@ -74,12 +82,13 @@ void encoder_init(void)
 
 ///////////////////////////////////
 //reads the encoder bits 0 and 1 on
-//port 2.
+//port 2.  Located at bits 3 and 4
 //
 uint8_t encoder_read(void)
 {
-    uint8_t val = P2IN & BIT0;
-    val |= (P2IN & BIT1);
+    uint8_t val = P2IN & BIT4;
+    val |= (P2IN & BIT3);
+    val = val >> 3;
 
     return val;
 }
@@ -156,7 +165,11 @@ EncoderDirection_t encoder_getDirection(void)
 
 ////////////////////////////////////
 //Interrupt Service Routines
-//PORT2 ISR - P2.0 and P2.1
+//PORT2 ISR - Encoder pins P2.3, P2.4,
+//and P2.5.
+//any of these will trigger the
+//interrupt.  Leave button unconnected
+//for now.
 //
 #pragma vector = PORT2_VECTOR
 __interrupt void Port_2(void)
@@ -190,8 +203,9 @@ __interrupt void Port_2(void)
 
 
 	//clear the interrupt flags
-	P2IFG &=~ BIT0;
-	P2IFG &=~ BIT1;
+	P2IFG &=~ ENCODER_BIT0_PIN;
+	P2IFG &=~ ENCODER_BIT1_PIN;
+	P2IFG &=~ ENCODER_BUTTON_PIN;
 
 }
 

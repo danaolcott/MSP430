@@ -48,13 +48,10 @@ void LCD_init(void)
 	LCD_DummyDelay(2000);
 	P2OUT |= LCD_RESET_PIN;
 
-	P1OUT |= LCD_CS_PIN;
-	P2OUT &=~ LCD_DC_PIN;
+	P1OUT |= LCD_CS_PIN;	//deselect
+	P2OUT &=~ LCD_DC_PIN;	//command
 
-	//write some commands.  note: these
-	//set up lines were taken off the sparkfun
-	//website.  I'll play around with these some more
-	//later
+	//init lcd.  Setup routine from Sparkfun
 
 	LCD_WriteCommand(0x21); //Tell LCD that extended commands follow
 	LCD_WriteCommand(0xB0); //Set LCD Vop (Contrast): Try 0xB1(good @ 3.3V) or 0xBF if your display is too dark
@@ -73,7 +70,6 @@ void LCD_init(void)
 	LCD_Clear(0x00);
 	LCD_SetRow(0);
 	LCD_SetColumn(0);
-
 }
 
 
@@ -85,13 +81,13 @@ void LCD_SPI_init(void)
 {
 	//chip select - P1.5
 	P1DIR |= LCD_CS_PIN;
-	P1OUT |= LCD_CS_PIN;
+	P1OUT |= LCD_CS_PIN;		//deselect device
 
 	//control lines - reset and data/cmd pins
 	P2DIR |= LCD_RESET_PIN;		//output P2.4
 	P2DIR |= LCD_DC_PIN;		//output P2.3
 
-	P2OUT &=~ LCD_RESET_PIN;
+	P2OUT |= LCD_RESET_PIN;
 	P2OUT &=~ LCD_DC_PIN;
 
 
@@ -210,7 +206,7 @@ void LCD_SetRow(uint8_t row)
 void LCD_SetColumn(uint8_t col)
 {
 	//test the column
-	if (col <= LCD_MAX_COL)
+	if (col < LCD_WIDTH)
 	{
         uint8_t value = 0x80 | col;
         LCD_WriteCommand(value);

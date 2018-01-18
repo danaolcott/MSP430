@@ -60,6 +60,7 @@ input			actual
 
 ///////////////////////////////////////////////////
 static uint32_t gClockFrequency = 0x00;
+static uint16_t gVFOIncrement = 1;
 
 /////////////////////////////////////////////////
 //helper functions
@@ -78,6 +79,9 @@ static void SetupMultisynth(uint8_t synth, uint32_t divider, uint8_t rDiv);
 void vfo_init(void)
 {
 	gClockFrequency = 7000000;
+	gVFOIncrement = 1;
+
+
 
 	//set CLKx_DIS high, reg 0x03 = 0xFF
 	vfo_writeReg(3,  0xFF);
@@ -276,15 +280,18 @@ uint32_t vfo_GetChannel0Frequency(void)
 }
 
 
+/////////////////////////////////////////
+//increment value changed in increment
+//increase/ decrease
 void vfo_IncreaseChannel0Frequency(void)
 {
-	gClockFrequency += 10000;
+	gClockFrequency += gVFOIncrement;
 	vfo_SetChannel0Frequency(gClockFrequency);
 }
 
 void vfo_DecreaseChannel0Frequency(void)
 {
-	gClockFrequency -= 10000;
+	gClockFrequency -= gVFOIncrement;
 	vfo_SetChannel0Frequency(gClockFrequency);
 }
 
@@ -376,9 +383,52 @@ void vfo_SetChannelState(VFOChannel_t ch, VFOState_t state)
 }
 
 
+/////////////////////////////////////
+//returns the frequency tuning increment
+uint16_t vfo_GetVFOIncrement(void)
+{
+	return gVFOIncrement;
+}
 
 
+///////////////////////////////////////
+//increase frequency tuning increment
+//
+uint16_t vfo_IncreaseVFOIncrement(void)
+{
+	//set the value
+	switch(gVFOIncrement)
+	{
+		case 1:			gVFOIncrement = 10;		break;
+		case 10:		gVFOIncrement = 100;	break;
+		case 100:		gVFOIncrement = 1000;	break;
+		case 1000:		gVFOIncrement = 10000;	break;
+		case 10000:		gVFOIncrement = 1;		break;
+		default:		gVFOIncrement = 1;		break;
+	}
 
+	return gVFOIncrement;
+}
+
+
+/////////////////////////////////////
+//decrease frequency tuning increment
+//
+uint16_t vfo_DecreaseVFOIncrement(void)
+{
+	//set the value
+	switch(gVFOIncrement)
+	{
+		case 1:			gVFOIncrement = 10000;	break;
+		case 10:		gVFOIncrement = 1;		break;
+		case 100:		gVFOIncrement = 10;		break;
+		case 1000:		gVFOIncrement = 100;	break;
+		case 10000:		gVFOIncrement = 1000;	break;
+		default:		gVFOIncrement = 1;		break;
+	}
+
+	return gVFOIncrement;
+}
 
 
 /////////////////////////////////

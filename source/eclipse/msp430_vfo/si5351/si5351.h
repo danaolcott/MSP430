@@ -52,7 +52,6 @@
 
 
 
-
 typedef enum
 {
 	VFO_CHANNEL_0,
@@ -75,6 +74,15 @@ typedef enum
 }VFODriveStrength_t;
 
 
+typedef enum
+{
+	VFO_INCREMENT_1HZ,
+	VFO_INCREMENT_10HZ,
+	VFO_INCREMENT_100HZ,
+	VFO_INCREMENT_1000HZ,
+	VFO_INCREMENT_10000HZ,
+}VFOIncrement_t;
+
 
 void vfo_init(void);
 void vfo_SetChannel0Frequency(uint32_t frequency);
@@ -87,6 +95,11 @@ void vfo_DecreaseChannel0Frequency(void);
 
 void vfo_SetChannelDrive(VFODriveStrength_t drive);
 void vfo_SetChannelState(VFOChannel_t ch, VFOState_t state);
+
+uint16_t vfo_GetVFOIncrement(void);
+uint16_t vfo_IncreaseVFOIncrement(void);
+uint16_t vfo_DecreaseVFOIncrement(void);
+
 
 uint8_t vfo_GetInitStatus(void);
 uint8_t vfo_GetPLLAStatus(void);
