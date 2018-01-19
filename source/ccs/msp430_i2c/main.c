@@ -25,11 +25,11 @@
 
 //#define I2C_ADDRESS				(((uint8_t)0x29) << 1)
 
-#define I2C_ADDRESS				(uint8_t)0x29
+//#define I2C_ADDRESS				(uint8_t)0x29	//TSL2561 - light sensor
+#define I2C_ADDRESS				(uint8_t)0x60		//si5351 - vfo
 
 //#define I2C_BUS_PRESCALE		((uint8_t)(0x28))	//400khz
 #define I2C_BUS_PRESCALE		((uint8_t)(0xA0))	//100khz
-
 
 
 
@@ -40,6 +40,8 @@ unsigned char store[40] = { 13, 13, 13, 13, 13, 13, 13, 0, 0, 0};
 
 
 //prototypes
+void dummy_delay(unsigned int temp);
+
 void delay_ms(volatile int ticks);
 void TimeDelay_Decrement(void);
 void GPIO_init(void);
@@ -52,6 +54,18 @@ void LightSensorWrite(uint8_t* data, uint8_t len);
 void LightSensorRead(uint8_t* data, uint8_t len);
 void LightSensorWriteAddress(uint8_t address, uint8_t* data, uint8_t len);
 void LightSensorReadAddress(uint8_t address, uint8_t* data, uint8_t len);
+
+
+//test functions - vfo read and write
+void vfo_writeReg(uint8_t reg, uint8_t data);
+void vfo_readReg(uint8_t reg, uint8_t* data);
+
+void i2c_init(void);
+void i2c_write(uint8_t* data, uint8_t len);
+void i2c_read(uint8_t* data, uint8_t len);
+
+void i2c_writeAddress(uint8_t address, uint8_t* data, uint8_t len);
+void i2c_readAddress(uint8_t address, uint8_t* data, uint8_t len);
 
 
 
@@ -71,68 +85,46 @@ void main(void)
 	GPIO_init();
 	Interrupt_init();
 
+	//wait a bit for all devices to power up
+	delay_ms(100);
+
 	//main loop
 	while(1)
 	{
 		LED_RED_TOGGLE();
-		delay_ms(500);
+//		delay_ms(100);
+
+		//test generic i2c read and write functions
+		//with the si5351
+		//read reg 0
+//		uint8_t val = 0xAA;
+
+		//test a generic write - address and reg
+		uint8_t reg = 3;
+		uint8_t data = 0xAA;
+		vfo_readReg(reg, &data);
+
+		data = 0xAA;
+		vfo_writeReg(reg, data);
+
+		delay_ms(1);
+		i2c_init();
 
 
-
-		//transmit to address to enable the light sensor
-		//write hex 0x03 to reg 0x00 to power up the light sensor
-//		uint8_t tx = 0x03;
-//		LightSensorWriteAddress(0x00, &tx, 1);
-//		delay_ms(1);
-		//write to a different reg - 0x01
-		//set integration time at bits 01, write 0x02
-//		tx = 0x02;
-//		LightSensorWriteAddress(0x01, &tx, 1);
-//		delay_ms(1);
-
-
-		//try writing 2 bytes starting at 0x00
-		//same as above, but in one cont opperation
-		//writes:
-		//0x29 << 1, write, ack, 0x01, ack, 0x03, ack, 0x02, nack
-//		uint8_t txArray[2] = {0x03, 0x02};
-//		LightSensorWriteAddress(0x00, txArray, 2);
-//		delay_ms(1);
-
-
-		//read 16 registers
-		memset(rxData, 0x00, 16);
-//		LightSensorReadArray(rxData, 16);
-//		void LightSensorReadArray(uint8_t address, uint8_t* data, uint8_t len)
-
-		//read array does not work.
-		//read 1 byte starting at address 0x00
-		LightSensorReadAddress(0x00, rxData, 1);
-
-
-/*
-		//address and prescaler - light sensor address = 0x29 << 1
-		TI_USCI_I2C_transmitinit(I2C_ADDRESS,I2C_BUS_PRESCALE);  // init transmitting with USCI
-
-		while ( TI_USCI_I2C_notready() );        			// wait for bus to be free
-		if ( TI_USCI_I2C_slave_present(I2C_ADDRESS) )    	// slave address may differ from
-		{                                         			// initialization
-			TI_USCI_I2C_receiveinit(I2C_ADDRESS,I2C_BUS_PRESCALE);   	// init receiving with USCI
-
-			while ( TI_USCI_I2C_notready() );         		// wait for bus to be free
-			TI_USCI_I2C_receive(4,store);
-			while ( TI_USCI_I2C_notready() );         		// wait for bus to be free
-
-			TI_USCI_I2C_transmitinit(I2C_ADDRESS,I2C_BUS_PRESCALE);  	// init transmitting with
-			while ( TI_USCI_I2C_notready() );         		// wait for bus to be free
-			TI_USCI_I2C_transmit(4,array);       			// start transmitting
-		}
-
-*/
+		delay_ms(50);
 
 
 	}
 
+}
+
+
+
+void dummy_delay(unsigned int temp)
+{
+	volatile unsigned int count = temp;
+	while(count > 0)
+		count--;
 }
 
 
@@ -311,6 +303,7 @@ void LightSensorRead(uint8_t* data, uint8_t len)
 
 	//read len bytes into data
 	TI_USCI_I2C_receive(len, data);
+	while ( TI_USCI_I2C_notready() );         		// wait for bus to be free
 
 }
 
@@ -404,6 +397,167 @@ void LightSensorReadAddress(uint8_t address, uint8_t* data, uint8_t len)
 
 
 }
+
+
+
+
+void vfo_writeReg(uint8_t reg, uint8_t data)
+{
+	uint8_t tx[2] = {reg, data};
+	i2c_write(tx, 2);
+}
+
+
+void vfo_readReg(uint8_t reg, uint8_t* data)
+{
+	uint8_t result = 0x00;
+	uint8_t tx = reg;
+
+	i2c_write(&tx, 1);
+	i2c_read(&result, 1);
+
+	*data = result;
+}
+
+
+
+/////////////////////////////////////////
+void i2c_init(void)
+{
+ 	//enable interrupts - required to read ack/nack, etc
+	_EINT();
+
+	//setup i2c slave for writing - send the address
+	//(7bits, not upshifted) and the prescale
+	TI_USCI_I2C_transmitinit(I2C_ADDRESS,I2C_BUS_PRESCALE);
+
+	while ( TI_USCI_I2C_notready() );		//wait
+
+	if (!TI_USCI_I2C_slave_present(I2C_ADDRESS))
+	{
+		while(1);
+	}
+
+}
+
+
+////////////////////////////////////////////////
+//multibyte write
+void i2c_write(uint8_t* data, uint8_t len)
+{
+ 	//enable interrupts - required to read ack/nack, etc
+	_EINT();
+
+	//setup i2c slave for writing - send the address
+	//(7bits, not upshifted) and the prescale
+	TI_USCI_I2C_transmitinit(I2C_ADDRESS,I2C_BUS_PRESCALE);
+	while ( TI_USCI_I2C_notready() );		//wait
+
+	//send the data
+	TI_USCI_I2C_transmit(len, data);
+	while ( TI_USCI_I2C_notready() );
+}
+
+
+
+
+////////////////////////////////////////////////
+//multibyte read
+//generic read that reads at the current
+//reg address, generates a start, nack on
+//last byte, and a stop
+void i2c_read(uint8_t* data, uint8_t len)
+{
+	_EINT();
+
+    //configure as master receiver
+	TI_USCI_I2C_receiveinit(I2C_ADDRESS,I2C_BUS_PRESCALE);
+	while ( TI_USCI_I2C_notready() );
+
+	//read len bytes into data
+	TI_USCI_I2C_receive(len, data);
+	while ( TI_USCI_I2C_notready() );
+
+}
+
+
+
+
+
+//////////////////////////////////////////////////////////////
+//i2c Write to reg address
+//Set up master as tx, send one address byte with
+//no stop condition.s  Then send len bytes from
+//data array.
+//useful when address has to be appended with
+//certain bits etc.  Ex light sensor.
+//
+void i2c_writeAddress(uint8_t address, uint8_t* data, uint8_t len)
+{
+
+	//enable interrupts - required to read ack/nack, etc
+	_EINT();
+
+	//setup i2c slave for writing - send the address
+	//(7bits, not upshifted) and the prescale
+	TI_USCI_I2C_transmitinit(I2C_ADDRESS,I2C_BUS_PRESCALE);
+	while ( TI_USCI_I2C_notready() );		//wait
+
+	//send the register address - no stop condition
+	TI_USCI_I2C_transmit_nostop(1, &address);
+	while ( TI_USCI_I2C_notready() );
+
+	//send the data - generates the stop condition when complete
+	TI_USCI_I2C_transmit(len, data);
+	while ( TI_USCI_I2C_notready() );
+
+}
+
+
+
+/////////////////////////////////////////
+//read memory bytes from starting address
+//Steps:
+//setup i2c device as master trasmitter
+//and transmit address byte and generate
+//the stop condition.  Then, set up i2c
+//device as a receiver and read len bytes
+//into data array.
+//
+//currently, this
+void i2c_readAddress(uint8_t address, uint8_t* data, uint8_t len)
+{
+	_EINT();
+
+	//setup i2c slave for writing - send the address
+	//(7bits, not upshifted) and the prescale
+	TI_USCI_I2C_transmitinit(I2C_ADDRESS,I2C_BUS_PRESCALE);
+	while ( TI_USCI_I2C_notready() );
+
+
+	//send the register address - no stop condition
+//	TI_USCI_I2C_transmit_nostop(1, &address);
+	TI_USCI_I2C_transmit(1, &address);
+
+    //wait a bit
+    while ( TI_USCI_I2C_notready() );
+
+    //setup i2c as a receiver
+	TI_USCI_I2C_receiveinit(I2C_ADDRESS,I2C_BUS_PRESCALE);
+
+    //wait a bit
+	while ( TI_USCI_I2C_notready() );
+
+	//read len bytes into data
+	TI_USCI_I2C_receive(len, data);
+
+    //wait a bit
+	while ( TI_USCI_I2C_notready() );
+
+}
+
+
+
 
 
 
