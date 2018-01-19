@@ -90,7 +90,8 @@ typedef enum
 	TASK_SIG_TOGGLE,		//toggle
 	TASK_SIG_ENCODER_LEFT,	//encoder left
 	TASK_SIG_ENCODER_RIGHT,	//encoder right
-	TASK_SIG_USER_BUTTON,
+	TASK_SIG_ENCODER_BUTTON,	//encoder button
+	TASK_SIG_USER_BUTTON,	//user button
 
 
 

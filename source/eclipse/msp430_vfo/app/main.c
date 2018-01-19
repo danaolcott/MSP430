@@ -81,7 +81,11 @@ void TimeDelay_Decrement(void);
 void GPIO_init(void);
 void TimerA_init(void);
 void Interrupt_init(void);
-void LED_RED_TOGGLE(void);
+void LED_Red_Toggle(void);
+void LED_Red_On(void);
+void LED_Red_Off(void);
+void LED_Green_Toggle(void);
+
 
 //Task Function Prototypes
 void TaskFunction_RxTask(void);
@@ -90,7 +94,6 @@ void TaskFunction_DisplayTask(void);
 
 //global variables
 static volatile int TimeDelay;
-static volatile uint8_t gDisplayMode;
 
 //main program
 int main(void)
@@ -130,9 +133,8 @@ int main(void)
 	LCD_WriteString(0, 0, "==========");
 	LCD_WriteString(1, 0, "QRP RIG");
 	LCD_WriteString(2, 0, "~10mW");
-	LCD_WriteString(3, 0, "--BOATS--");
-	LCD_WriteString(4, 3, "&");
-	LCD_WriteString(5, 0, " -HOES-");
+	LCD_WriteString(3, 0, "==========");
+
 
 	delay_ms(2000);
 	LCD_Clear(0x00);
@@ -215,7 +217,6 @@ void GPIO_init(void)
 	P2REN |= BIT2;		//enable pullup/down
 	P2OUT |= BIT2;		//resistor set to pull up
 
-
 }
 
 /////////////////////////////////////////
@@ -273,11 +274,28 @@ void Interrupt_init(void)
 }
 
 ///////////////////////////////////////////
-void LED_RED_TOGGLE(void)
+void LED_Red_Toggle(void)
 {
 	P1OUT ^= BIT0;
 }
 
+void LED_Red_On(void)
+{
+	P1OUT |= BIT0;
+}
+
+void LED_Red_Off(void)
+{
+	P1OUT &=~ BIT0;
+}
+
+/////////////////////////////////
+//Green on P1.6 is disabled and using
+//a jumper to 1.1
+void LED_Green_Toggle(void)
+{
+	P1OUT ^= BIT1;
+}
 
 
 
@@ -336,9 +354,18 @@ void TaskFunction_RxTask(void)
 	TaskMessage msg = {TASK_SIG_NONE};
 	uint8_t index = Task_GetIndexFromName("rxTask");
 
+	/////////////////////////////////
+	//RIT switch - test P2.2 and set the led
+	//and state accordingly
 	vfo_RIT_SetRIT(((P2IN & BIT2) >> 2));
+	if (P2IN & BIT2)
+		LED_Red_On();
+	else
+		LED_Red_Off();
 
 
+	///////////////////////////////////////
+	//read all messages in the queue
 	while (Task_GetNextMessage(index, &msg) > 0)
 	{
 		switch(msg.signal)
@@ -347,6 +374,12 @@ void TaskFunction_RxTask(void)
 			case TASK_SIG_ON:		break;
 			case TASK_SIG_OFF:		break;
 			case TASK_SIG_TOGGLE:	break;
+
+			case TASK_SIG_ENCODER_BUTTON:
+			{
+				vfo_IncreaseVFOIncrement();
+				break;
+			}
 
 			case TASK_SIG_ENCODER_LEFT:
 			{
@@ -367,7 +400,6 @@ void TaskFunction_RxTask(void)
 			case TASK_SIG_USER_BUTTON:
 			{
 				P1OUT ^= BIT0;
-				vfo_IncreaseVFOIncrement();
 				break;
 			}
 
@@ -390,7 +422,7 @@ void TaskFunction_RxTask(void)
 //frequency
 void TaskFunction_LedTask(void)
 {
-	LED_RED_TOGGLE();
+	LED_Green_Toggle();
 }
 
 

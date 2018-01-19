@@ -177,28 +177,42 @@ __interrupt void Port_2(void)
 	//dummy delay - kill a few cpu cycles
 	encoder_delay(2000);
 
-	//get the encoder direction - read bits
-	//and compare with last location
-	EncoderDirection_t dir = encoder_getDirection();
-
-	uint8_t okFlag = 1;
-
-	//send message to the receiver task with
-	//TASK_SIG_###
-	TaskMessage msg;
-	msg.signal = TASK_SIG_ENCODER_LEFT;
-
-	if (dir == ENCODER_DIR_LEFT)
-		msg.signal = TASK_SIG_ENCODER_LEFT;
-	else if (dir == ENCODER_DIR_RIGHT)
-		msg.signal = TASK_SIG_ENCODER_RIGHT;
-	else
-		okFlag = 0;
-
-	if (okFlag == 1)
+	//check the encoder button, if low...
+	if (!(P2IN & BIT5))
 	{
+		TaskMessage msg;
+		msg.signal = TASK_SIG_ENCODER_BUTTON;
 		int index = Task_GetIndexFromName("rxTask");
 		Task_SendMessage(index, msg);
+
+	}
+
+	else
+	{
+		//get the encoder direction - read bits
+		//and compare with last location
+		EncoderDirection_t dir = encoder_getDirection();
+
+		uint8_t okFlag = 1;
+
+		//send message to the receiver task with
+		//TASK_SIG_###
+		TaskMessage msg;
+		msg.signal = TASK_SIG_ENCODER_LEFT;
+
+		if (dir == ENCODER_DIR_LEFT)
+			msg.signal = TASK_SIG_ENCODER_LEFT;
+		else if (dir == ENCODER_DIR_RIGHT)
+			msg.signal = TASK_SIG_ENCODER_RIGHT;
+		else
+			okFlag = 0;
+
+		if (okFlag == 1)
+		{
+			int index = Task_GetIndexFromName("rxTask");
+			Task_SendMessage(index, msg);
+		}
+
 	}
 
 	//clear the interrupt flags
