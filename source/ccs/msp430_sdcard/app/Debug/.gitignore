@@ -1,0 +1,9 @@
+/fatfs/
+/makefile
+/objects.mk
+/sources.mk
+/spi/
+/subdir_rules.mk
+/subdir_vars.mk
+/timer/
+/usart/
