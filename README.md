@@ -26,8 +26,8 @@ The purpose of building projects in Eclipse was to try a diffrent approach that 
 
 After building the project, go into debug directory and flash the processor using mspdebug using the following commands (via commandline):
   - mspdebug rf2500
-  -prog myprogram.elf
-  -run
+  - prog myprogram.elf
+  - run
  
 See mspdebug -help for many more options.  Routing the debugger through Eclipse is a bit tricky.  While connected via mspdebug, run gdb (ie, command gdb).  This will search for a connection.  In Eclipse, start the hardware debugger through Debug Configurations, Hardware Debugging, Local Host (Port 2000).  Stepping through the code works... sort of , not as well as using CCS.  I got mixed results, sometimes setting break points, stepping through code worked well, other times not so well.
 
