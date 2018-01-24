@@ -14,16 +14,25 @@
 #define	_USE_LSEEK	1	/* Enable pf_lseek() function */
 #define	_USE_WRITE	1	/* Enable pf_write() function */
 
-#define _FS_FAT12	1	/* Enable FAT12 */
-#define _FS_FAT16	1	/* Enable FAT16 */
+//#define _FS_FAT12	1	/* Enable FAT12 */
+//#define _FS_FAT16	1	/* Enable FAT16 */
+//#define _FS_FAT32	1	/* Enable FAT32 */
+
+
+#define _FS_FAT12	0	/* Enable FAT12 */
+#define _FS_FAT16	0	/* Enable FAT16 */
 #define _FS_FAT32	1	/* Enable FAT32 */
+
 
 
 /*---------------------------------------------------------------------------/
 / Locale and Namespace Configurations
 /---------------------------------------------------------------------------*/
 
-#define _USE_LCC	0	/* Allow lower case characters for path name */
+//#define _USE_LCC	0	/* Allow lower case characters for path name */
+
+#define _USE_LCC	1	/* Allow lower case characters for path name */
+
 
 #define	_CODE_PAGE	437
 /* The _CODE_PAGE specifies the code page to be used on the target system.
@@ -63,7 +72,10 @@
 / System Configurations
 /---------------------------------------------------------------------------*/
 
-#define _WORD_ACCESS	1
+//#define _WORD_ACCESS	1
+
+#define _WORD_ACCESS	0
+
 /* The _WORD_ACCESS option is an only platform dependent option. It defines
 /  which access method is used to the word data on the FAT volume.
 /

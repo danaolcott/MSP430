@@ -11,7 +11,6 @@ extern "C" {
 
 #include "integer.h"
 
-
 /* Status of Disk Functions */
 typedef BYTE	DSTATUS;
 
@@ -53,10 +52,14 @@ DRESULT disk_writep (const BYTE* buff, DWORD sc);
 
 /////////////////////////////////////
 //extra functions - defined in mmc.c
+int mmc_init(void);
 unsigned char mmc_GoIdleState(void);
-unsigned int mmc_writeFile(FATFS *fs, char* name, char* buffer, unsigned int size);
-unsigned int mmc_readFile(FATFS *fs, char* name, char* buffer, unsigned int maxBytes);
+unsigned int mmc_writeFile(char* name, char* buffer, unsigned int size);
+unsigned int mmc_writeLine(char* name, unsigned int line, char* buffer, unsigned int size);
+unsigned int mmc_readFile(char* name, char* buffer, unsigned int maxBytes);
+unsigned int mmc_append(char* name, char* buffer, unsigned int size);
 
+unsigned long mmc_cleanFile(char* name, char val);
 
 #ifdef __cplusplus
 }

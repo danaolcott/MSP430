@@ -129,7 +129,7 @@ void usart_writeByte(uint8_t value)
 //SerialWriteString
 //used for transmitting just a string with
 //unknown size.  does not clear a buffer
-void usart_writeString(char * buffer)
+void usart_writeString(uint8_t* buffer)
 {
 	uint8_t i = 0;
 
@@ -149,7 +149,7 @@ void usart_writeString(char * buffer)
 //used for transmitting the rx buffer
 //back over the serial port - write the buffer
 //and clear it
-void usart_writeStringLength(char *buffer, uint8_t size)
+void usart_writeStringLength(uint8_t* buffer, uint8_t size)
 {
 	uint8_t i = 0;
 	for (i = 0 ; i < size ; i++)
@@ -168,7 +168,7 @@ void usart_writeStringLength(char *buffer, uint8_t size)
 //ProcessCommand
 //process the incomming data and write out something
 //use string compare functiosn with buffer
-void usart_processCommand(char *buffer, uint8_t len)
+void usart_processCommand(uint8_t* buffer, uint8_t len)
 {
 	//temporarily disable the rx interrupts
 	IE2 &=~ UCA0RXIE;

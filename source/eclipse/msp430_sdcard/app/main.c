@@ -18,6 +18,8 @@
  *
  * Disable the green led
  *
+ * 16x32 =
+ *
  *
  *
  *
@@ -45,20 +47,15 @@ void LED_Red_Toggle(void);
 void LED_Red_On(void);
 void LED_Red_Off(void);
 
+unsigned char gResetDiskFlag = 0;
+
 //main program
 int main(void)
 {
-	char txBuffer[64];
-	char rxBuffer[64];
-
-	memset(txBuffer, 0x00, 64);
+	uint8_t rxBuffer[64];
 	memset(rxBuffer, 0x00, 64);
 
-
-	BYTE res = FR_OK;
-	FATFS fs;			/* File system object */
-//	uint8_t sdcardReady = 0;
-	uint8_t result = 0;
+	gResetDiskFlag = 0;
 
 	//disable the watchdog timer
 	WDTCTL = WDTPW + WDTHOLD;
@@ -69,28 +66,8 @@ int main(void)
 	spi_init(SPI_SPEED_400KHZ);
 	usart_init();
 
-	result = mmc_GoIdleState();
-
-	if (result == 1)
-	{
-		res = pf_mount(&fs);
-
-		if (res == FR_OK)
-		{
-			spi_init(SPI_SPEED_4MHZ);
-		}
-
-		else
-		{
-			while(1)
-			{
-				LED_Red_Toggle();
-				Timer_delay_ms(50);
-			}
-		}
-	}
-
-	else
+	int result = mmc_init();
+	if (result < 0)
 	{
 		while(1)
 		{
@@ -99,41 +76,43 @@ int main(void)
 		}
 	}
 
+	//clean the test file
+//	mmc_cleanFile("test.txt", '*');
+	for (int i = 0 ; i < 10 ; i++)
+	{
+		LED_Red_Toggle();
+		Timer_delay_ms(50);
+	}
+
+
+	int n = 0;
+	int counter = 0;
+	unsigned int ret;
 
 	while (1)
 	{
-		LED_Red_Toggle();
-		Timer_delay_ms(1000);
+		LED_Red_On();
 
+		n = sprintf((char*)rxBuffer, "New Data Entry Set %d = %d", counter, counter);
+		ret = mmc_append("test.txt", (char*)rxBuffer, n);
 
-		//try writing hello to test.txt
-		//unsigned int size = mmc_writeFile(&fs, "test.txt", "hello", 5);
+		//end of file?
+		if (ret != n)
+			gResetDiskFlag = 1;
 
-		//read a file into a buffer
-//		unsigned int size = mmc_readFile(&fs, "test.txt", rxBuffer, 64);
-
-		//read file into usart output
-		unsigned int size = mmc_readFile(&fs, "test.txt", NULL, 64);
-
-
-/*
-
-		if (size == 5)
+		//check the reset disk flag
+		if (gResetDiskFlag == 1)
 		{
-			LED_Red_Toggle();
-			Timer_delay_ms(100);
-			LED_Red_Toggle();
-			Timer_delay_ms(100);
+			mmc_cleanFile("test.txt", '*');
+			gResetDiskFlag = 0;
 		}
-		else
-		{
-			LED_Red_Toggle();
-			Timer_delay_ms(10);
-			LED_Red_Toggle();
-			Timer_delay_ms(10);
-		}
-*/
 
+		Timer_delay_ms(100);
+
+		LED_Red_Off();
+		Timer_delay_ms(500);
+
+		counter++;
 	}
 
 	return 0;
@@ -165,7 +144,6 @@ void GPIO_init(void)
 	P1DIR &=~ BIT3;		//input
 	P1REN |= BIT3;		//enable pullup/down
 	P1OUT |= BIT3;		//resistor set to pull up
-
 }
 
 ///////////////////////////////////////////
@@ -201,7 +179,7 @@ void LED_Red_Off(void)
 #pragma vector = PORT1_VECTOR
 __interrupt void Port_1(void)
 {
-
+	gResetDiskFlag = 1;
 	//clear the interrupt flag - button
 	P1IFG &=~ BIT3;
 }

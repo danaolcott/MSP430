@@ -11,15 +11,11 @@
 
 #include <msp430.h>
 #include <msp430g2553.h>
+#include <string.h>
+
 #include "spi.h"
 #include "timer.h"
 #include "usart.h"
-
-//make a dummy xmit function
-void xmit(BYTE temp)
-{
-
-}
 
 #define SELECT()	P2OUT &=~ SPI_CS_PIN	/* write - CS = L */
 #define	DESELECT()	P2OUT |= SPI_CS_PIN		/* write - CS = H */
@@ -38,6 +34,22 @@ BYTE rcv_spi (void);		/* Send a 0xFF to the MMC and get the received byte (usi.S
 //
 //
 //////////////////////////////////////////////
+
+static FATFS fs;			/* File system object */
+//entry signal, all appends start with a ~
+#define ENTRY_SIGNAL		((char)'~')
+#define CLEAN_CHAR			((char)0x00)
+#define NEWLINE				((char)'\n')
+#define CARRIGE_RETURN		((char)'\r')
+
+#define OUT_BUFFER_SIZE		64
+static unsigned char outBuffer[OUT_BUFFER_SIZE];
+
+
+
+
+
+
 
 
 /*--------------------------------------------------------------------------
@@ -294,10 +306,13 @@ void init_spi (void)
 
 //////////////////////////////////////
 //delay - use timer delay
-
+//use a dummy delay, not the timer
+//might be messing things up
 void dly_100us (void)
 {
-	Timer_delay_ms(1);
+	volatile unsigned int temp = 10000;
+	while (temp > 0)
+		temp--;
 }
 
 
@@ -316,6 +331,45 @@ BYTE rcv_spi (void)
 	return value;
 }
 
+
+
+
+///////////////////////////////////////
+//mmc_init
+//puts card into idle state, mounts
+//drive, etc.
+int mmc_init(void)
+{
+	FRESULT res;
+
+	memset(outBuffer, 0x00, OUT_BUFFER_SIZE);
+
+
+
+	unsigned char result = mmc_GoIdleState();
+
+	if (result == 1)
+	{
+		res = pf_mount(&fs);
+
+		if (res == FR_OK)
+		{
+			spi_init(SPI_SPEED_4MHZ);
+		}
+
+		else
+		{
+			return -1;		//unable to mount drive
+		}
+	}
+
+	else
+	{
+		return -2;			//unable to go idle state
+	}
+
+	return 1;
+}
 
 ///////////////////////////////////////
 //go idle - put sd card into idle state
@@ -369,21 +423,23 @@ unsigned char mmc_GoIdleState(void)
 //reset the file pointer
 //write the data
 //write null
-unsigned int mmc_writeFile(FATFS *fs, char* name, char* buffer, unsigned int size)
+unsigned int mmc_writeFile(char* name, char* buffer, unsigned int size)
 {
 	unsigned int bytesWritten = 0x00;
 	unsigned int num = 0;
+
+	Timer_stop();
+
 	pf_open(name);					//open the file
 
-	pf_lseek(fs->fptr);						//reset the file pointer
+	pf_lseek(0x00);						//reset the file pointer
 
 	pf_write(buffer, size, &num);	//write data
 	bytesWritten += num;
 
 	pf_write(0, 0, &num);			//terminate
-//	bytesWritten += num;
 
-	pf_open("dummy");
+	Timer_start();
 
 	return bytesWritten;
 }
@@ -391,23 +447,161 @@ unsigned int mmc_writeFile(FATFS *fs, char* name, char* buffer, unsigned int siz
 ///////////////////////////////////////////////
 //read data from a file into a buffer
 //pass the file pointer
-unsigned int mmc_readFile(FATFS *fs, char* name, char* buffer, unsigned int maxBytes)
+unsigned int mmc_readFile(char* name, char* buffer, unsigned int maxBytes)
 {
 	unsigned int bytesRead = 0x00;
 	unsigned int num = 0;
-	pf_open(name);						//open the file
+	FRESULT res;
 
-	pf_lseek(0);						//reset the file pointer
+	Timer_stop();
 
-	//try reading max bytes, load num ptr
-	//with bytes read
-	pf_read(buffer, maxBytes, &num);	//write data
-	bytesRead += num;					//bytes read
+	res = pf_open(name);						//open the file
 
-	pf_read(0, 0, &num);				//terminate
-	bytesRead += num;
+	if (res == FR_OK)
+	{
+		res = pf_lseek(0);						//reset the file pointer
+
+		//try reading max bytes, load num ptr
+		//with bytes read
+		res = pf_read(buffer, maxBytes, &num);	//write data
+		bytesRead += num;						//bytes read
+		res = pf_read(0, 0, &num);				//terminate
+	}
+
+	Timer_start();
 
 	return bytesRead;
+}
+
+
+
+/////////////////////////////////////////////////////////
+//writes a line to a file.
+//lines are defined as 512 bytes each
+//writes data and completes the line with 0x00.
+//
+//This function sort of works.. kind of.
+//helps to add \r\n at beginning and end of
+//the line so it's readable
+//
+unsigned int mmc_writeLine(char* name, unsigned int line, char* buffer, unsigned int size)
+{
+	unsigned int bytesWritten = 0x00;
+	unsigned int num = 0;
+
+	unsigned int offset = line * 512;
+
+	Timer_stop();
+
+	pf_open(name);					//open the file
+	pf_lseek(offset);				//jump file ptr to line
+	pf_write(buffer, size, &num);	//write data
+	bytesWritten += num;
+	pf_write(0, 0, &num);			//terminate to complete the line
+
+	Timer_start();
+
+	return bytesWritten;
+}
+
+
+
+/////////////////////////////////////////////////////
+//appends data after the first instance of appendChar
+//then writes 0x00 to complete a sector
+//The appendchar is searched at the start of each sector.
+//ie, finding the 0x00 in a sector and just jumping
+//to the next does not help because if one already appended
+//data, it will get overwritten.  So it has to check
+//for first instance of 0x00 at the beginning of the sector
+//
+//ENTRY_SIGNAL
+//entry signal - char that defines a data entry, ie, ~, or -, or
+//...>  etc.  Will break on the first non entry
+//
+//when calling this function, don't include any \r\n etc
+//to the append string, this function takes care of it.
+
+//return bytes do not include the \r\n
+unsigned int mmc_append(char* name, char* buffer, unsigned int size)
+{
+	unsigned int bytesWritten = 0x00;
+	unsigned int num = 0;
+	unsigned long offset = 0x00;
+
+	Timer_stop();
+
+	char c;						//first char in the beginning of a sector
+	pf_open(name);				//open the file
+
+	offset = 0;
+
+	pf_lseek(offset);			//reset
+	pf_read(&c, 1, &num);		//read initial char
+	pf_read(0, 0, &num);		//read remaining
+
+	while (((c == '~') || (c == '\r') || (c == '\n')) && (offset < fs.fsize))
+	{
+		offset+=512;
+		pf_lseek(offset);		//jump
+		pf_read(&c, 1, &num);	//get first char
+		pf_read(0, 0, &num);	//read remaining
+	}
+
+
+	pf_lseek(offset);		//jump
+
+	//append data - return, newline, entry signal
+	char* msg = "\r\n~";
+	pf_write(msg, 3, &num);
+
+	//write the data
+	pf_write(buffer, size, &num);	//write data
+
+	bytesWritten += num;
+	pf_write(0, 0, &num);			//terminate to complete the line
+
+	Timer_start();
+
+	return bytesWritten;
+}
+
+
+
+///////////////////////////////////////////////
+//
+//fills the file with val
+//use outBuffer, 64, as a buffer
+//for writing
+unsigned long mmc_cleanFile(char* name, char val)
+{
+//	unsigned long fileSize = fs.fsize;
+	unsigned long fileSize = 0xFFF;
+	unsigned long i, count;
+	unsigned int num;
+	count = 0;
+
+	memset(outBuffer, val, OUT_BUFFER_SIZE);
+
+	Timer_stop();
+
+	pf_open(name);
+	pf_lseek(0);
+
+	for (i = 0 ; i < fileSize ; i++)
+	{
+		pf_write(outBuffer, OUT_BUFFER_SIZE, &num);
+		count++;
+		if (!(count % 10))
+			P1OUT ^= BIT0;		//toggle ti indicate it's doing something
+	}
+
+	pf_write(0, 0, &num);
+
+	Timer_start();
+
+	return count;
+
 }
 
 

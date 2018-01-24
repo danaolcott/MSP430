@@ -77,6 +77,20 @@ void Timer_delay_ms(uint16_t delay)
 }
 
 
+
+////////////////////////////////////////
+void Timer_start(void)
+{
+	TACTL |= BIT1;		//enable the interrupt
+	TACTL &=~ BIT0;		//clear all pending interrupts
+}
+void Timer_stop(void)
+{
+	TACTL &=~ BIT1;			//disable interrupts
+	TACTL &=~ BIT0;		//clear all pending interrupts
+}
+
+
 void Timer_Counter1Set(uint16_t count)
 {
 	gCounter1Tick = count;
@@ -105,7 +119,6 @@ __interrupt void Timer_A(void)
 
     Timer_DelayDecrement();
     Timer_Counter1Decrement();
-
 }
 
 
