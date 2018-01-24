@@ -28,22 +28,27 @@
 		<link>
 			<name>fatfs</name>
 			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/fatfs</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/eclipse/msp430_sdcard/fatfs</locationURI>
+		</link>
+		<link>
+			<name>main.c</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/eclipse/msp430_sdcard/app/main.c</locationURI>
 		</link>
 		<link>
 			<name>spi</name>
 			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/spi</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/eclipse/msp430_sdcard/spi</locationURI>
 		</link>
 		<link>
 			<name>timer</name>
 			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/timer</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/eclipse/msp430_sdcard/timer</locationURI>
 		</link>
 		<link>
 			<name>usart</name>
 			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/usart</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/eclipse/msp430_sdcard/usart</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

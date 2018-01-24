@@ -78,7 +78,8 @@ int main(void)
 
 	//clean the test file
 //	mmc_cleanFile("test.txt", '*');
-	for (int i = 0 ; i < 10 ; i++)
+	int i;
+	for (i = 0 ; i < 10 ; i++)
 	{
 		LED_Red_Toggle();
 		Timer_delay_ms(50);
