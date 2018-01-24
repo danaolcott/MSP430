@@ -22,7 +22,7 @@ Project Listing (Eclipse)
 -------------------------
 The purpose of building projects in Eclipse was to try a diffrent approach that what I was doing before.  For these projects, I used the msp430-gcc toolchain and programmed the processor using mspdebug.  A few important settings / switches need to be set up in the Eclipse project, including the following:
 - linker flags:  -mmcu=msp430g2553
-- preprocessor defines:  "__MSP430G2553__"
+- preprocessor defines:  __ MSP430G2553__
 
 After building the project, go into debug directory and flash the processor using mspdebug using the following commands (via commandline):
   - mspdebug rf2500
