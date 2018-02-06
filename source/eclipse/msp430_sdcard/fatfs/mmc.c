@@ -576,10 +576,11 @@ unsigned int mmc_append(char* name, char* buffer, unsigned int size)
 unsigned long mmc_cleanFile(char* name, char val)
 {
 //	unsigned long fileSize = fs.fsize;
-	unsigned long fileSize = 0xFFF;
-	unsigned long i, count;
+	unsigned long fileSize = 0x1FF;
+	unsigned long i, j, count;
 	unsigned int num;
 	count = 0;
+	char c = val;
 
 	memset(outBuffer, val, OUT_BUFFER_SIZE);
 
@@ -590,10 +591,13 @@ unsigned long mmc_cleanFile(char* name, char val)
 
 	for (i = 0 ; i < fileSize ; i++)
 	{
-		pf_write(outBuffer, OUT_BUFFER_SIZE, &num);
-		count++;
-		if (!(count % 10))
-			P1OUT ^= BIT0;		//toggle ti indicate it's doing something
+		for (j = 0 ; j < 512 ; j++)
+		{
+			pf_write(&c, 1, &num);
+			count++;
+			if (!(count % 100))
+				P1OUT ^= BIT0;		//toggle ti indicate it's doing something
+		}
 	}
 
 	pf_write(0, 0, &num);

@@ -32,7 +32,6 @@
 #include <stdint.h>
 #include <string.h>
 
-
 #include "timer.h"
 #include "spi.h"
 #include "usart.h"
@@ -77,7 +76,7 @@ int main(void)
 	}
 
 	//clean the test file
-//	mmc_cleanFile("test.txt", '*');
+	mmc_cleanFile("test.txt", '*');
 	int i;
 	for (i = 0 ; i < 10 ; i++)
 	{
