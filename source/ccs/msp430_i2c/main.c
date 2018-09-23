@@ -25,11 +25,15 @@
 
 //#define I2C_ADDRESS				(((uint8_t)0x29) << 1)
 
-//#define I2C_ADDRESS				(uint8_t)0x29	//TSL2561 - light sensor
-#define I2C_ADDRESS				(uint8_t)0x60		//si5351 - vfo
+//#define I2C_ADDRESS				(uint8_t)0x29	//TSL2561 - light sensor - grounded
+#define I2C_ADDRESS				(uint8_t)0x39	//TSL2561 - light sensor - floating
+//#define I2C_ADDRESS				(uint8_t)0x60		//si5351 - vfo
 
-//#define I2C_BUS_PRESCALE		((uint8_t)(0x28))	//400khz
-#define I2C_BUS_PRESCALE		((uint8_t)(0xA0))	//100khz
+//#define I2C_ADDRESS				(uint8_t)0x1E
+//#define I2C_ADDRESS				(((uint8_t)0x1E) << 1)
+
+#define I2C_BUS_PRESCALE		((uint8_t)(0x28))	//400khz
+//#define I2C_BUS_PRESCALE		((uint8_t)(0xA0))	//100khz
 
 
 
@@ -85,33 +89,25 @@ void main(void)
 	GPIO_init();
 	Interrupt_init();
 
+	i2c_init();
+
 	//wait a bit for all devices to power up
 	delay_ms(100);
+
+
 
 	//main loop
 	while(1)
 	{
 		LED_RED_TOGGLE();
-//		delay_ms(100);
 
-		//test generic i2c read and write functions
-		//with the si5351
-		//read reg 0
-//		uint8_t val = 0xAA;
+		uint8_t rx[16] = {0x00};
 
-		//test a generic write - address and reg
-		uint8_t reg = 3;
-		uint8_t data = 0xAA;
-		vfo_readReg(reg, &data);
-
-		data = 0xAA;
-		vfo_writeReg(reg, data);
-
-		delay_ms(1);
-		i2c_init();
-
+		LightSensorReadAddress(0x0A, rx, 1);
 
 		delay_ms(50);
+
+		i2c_init();
 
 
 	}

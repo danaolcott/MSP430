@@ -1,0 +1,1 @@
+"./main.obj" "./sensors/BME280.obj" "./hardware/TI_USCI_I2C_master.obj" "./hardware/i2c.obj" "./display/font_table.obj" "./display/offset.obj" "./display/ssd1306_lcd.obj" "../lnk_msp430g2553.cmd" -l"libc.a" 
