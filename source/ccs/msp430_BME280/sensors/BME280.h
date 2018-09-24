@@ -55,8 +55,11 @@ typedef struct
 	uint32_t uTemperature;
 	uint32_t uHumidity;
 
-	int32_t cTemperatureInt;
-	int32_t cTemperatureFrac;
+	int32_t cTemperatureCInt;
+	int32_t cTemperatureCFrac;
+	int32_t cTemperatureFInt;
+	int32_t cTemperatureFFrac;
+
 	uint32_t cPressureInt;
 	uint32_t cPressureFrac;
 	uint32_t cHumidityInt;
@@ -96,6 +99,9 @@ void BME280_init(void);
 void BME280_reset(void);
 uint8_t BME280_readChipID(void);
 BME280_Data BME280_read(void);
+
+void BME280_sleep(void);
+void BME280_wakeup(void);
 
 
 BME280_S32_t BME280_compensate_T_int32(BME280_S32_t adc_T);

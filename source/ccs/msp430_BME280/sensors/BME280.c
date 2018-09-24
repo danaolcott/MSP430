@@ -54,7 +54,16 @@ void BME280_init(void)
 	//bits 4-2 - osrs_p - pressure 001 - 1x sampling
 	//bits 1-0 - mode.  set to 11 for normal mode., set to 00 for sleep mode
 	//result = 00100100  = 0x24 - sleep
-	BME280_writeReg(BME280_REG_CTRL_MEAS, 0x24);		//enable and sleep
+	//	BME280_writeReg(BME280_REG_CTRL_MEAS, 0x24);		//enable and sleep
+
+	//try higher oversampling for pressure
+	//IR Filter disabled, oversample bits = 4, 100
+	//00110000 - sleep
+	BME280_writeReg(BME280_REG_CTRL_MEAS, 0x30);		//8x pressure SO enable and sleep
+
+
+
+
 
 	//#define BME280_REG_CONFIG		0xF5
 	//readings should be while in sleep mode or
@@ -136,9 +145,15 @@ BME280_Data BME280_read(void)
 	BME280_U32_t cPressure = BME280_compensate_P_int64((BME280_S32_t)uPressure);		//divide 256 for integer
 	BME280_U32_t cHumidity = BME280_compensate_H_int32((BME280_S32_t)uHumidity);		//divide 1024 for integer
 
-	//integer and fractional
-	result.cTemperatureInt = cTemperature / 100;
-	result.cTemperatureFrac = cTemperature % 100;
+	//integer and fractional - celcius
+	result.cTemperatureCInt = cTemperature / 100;
+	result.cTemperatureCFrac = cTemperature % 100;
+
+	BME280_S32_t cTemperatureF = cTemperature * 9 / 5;
+	cTemperatureF += 3200;
+
+	result.cTemperatureFInt = cTemperatureF / 100;
+	result.cTemperatureFFrac = cTemperatureF % 100;
 
 	result.cPressureInt = cPressure / 256;
 	result.cPressureFrac = cPressure % 256;
@@ -162,15 +177,21 @@ BME280_Data BME280_read(void)
 //Put the sensor into sleep mode
 void BME280_sleep(void)
 {
+	uint8_t value = BME280_readReg(BME280_REG_CTRL_MEAS);
+	value &=~ 0x03;				//bits 0 and 1 low
 
+	BME280_writeReg(BME280_REG_CTRL_MEAS, value);
 }
 
 ///////////////////////////////////////////////////
 //Wake up the sensor and put into continuous
-//reading mode
+//reading mode.  CTRL_MEAS register, bits 0:1, 11
 void BME280_wakeup(void)
 {
+	uint8_t value = BME280_readReg(BME280_REG_CTRL_MEAS);
+	value |= 0x03;				//bits 0 and 1 high
 
+	BME280_writeReg(BME280_REG_CTRL_MEAS, value);
 }
 
 

@@ -70,28 +70,29 @@ void main(void)
 		LED_RED_TOGGLE();
 
 		//read the pressure, temperature, humidity
-		//from the BME280 chip
 		BME280_Data bmeData = BME280_read();
 
 		//output the results to the LCD
 		uint8_t buffer[64] = {0x00};
-		LCD_DrawStringKern(0, 3, "Temperature");
-		LCD_DrawStringKern(2, 4, "Pressure");
-		LCD_DrawStringKern(4, 5, "Humidity");
+		LCD_DrawStringKern(0, 3, "Temp (C:F)");
+		LCD_DrawStringKern(3, 4, "Press(kPa)");
+		LCD_DrawStringKern(6, 5, "Humidity");
 
-		int n = sprintf((char*)buffer, "T(C): %d.%d   ", (int)bmeData.cTemperatureInt, (int)bmeData.cTemperatureFrac);
+		int n = sprintf((char*)buffer, "%d.%d : %d.%d   ", (int)bmeData.cTemperatureCInt, (int)bmeData.cTemperatureCFrac,
+				(int)bmeData.cTemperatureFInt, (int)bmeData.cTemperatureFFrac);
+
 		LCD_DrawStringKernLength(1, 3, buffer, n);
 
 		int cPressKPAInt = bmeData.cPressureInt / 1000;
 		int cPressKPAFrac = bmeData.cPressureInt % 1000;
 
-		n = sprintf((char*)buffer, "P kPa: %d.%d   ", cPressKPAInt, cPressKPAFrac);
-		LCD_DrawStringKernLength(3, 3, buffer, n);
+		n = sprintf((char*)buffer, "%d.%d   ", cPressKPAInt, cPressKPAFrac);
+		LCD_DrawStringKernLength(4, 3, buffer, n);
 
-		n = sprintf((char*)buffer, "H(Perc): %d.%d   ", (int)bmeData.cHumidityInt, (int)bmeData.cHumidityFrac);
-		LCD_DrawStringKernLength(5, 3, buffer, n);
+		n = sprintf((char*)buffer, "%d.%d   ", (int)bmeData.cHumidityInt, (int)bmeData.cHumidityFrac);
+		LCD_DrawStringKernLength(7, 3, buffer, n);
 
-		delay_ms(500);
+		delay_ms(1000);
 	}
 
 }
