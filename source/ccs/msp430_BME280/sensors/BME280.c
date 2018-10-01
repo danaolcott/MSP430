@@ -32,10 +32,13 @@ BME280_S32_t t_fine;		//used in the temperature, pressure, humidity correction f
 
 //////////////////////////////////////////////////////////
 //Configure for reading pressure, humidity, temp, I2C
+//Follows Table 9 in the datasheet for best performance
+//for use with indoor navigation.  Minimize noise in
+//the pressure reading.
+//
 void BME280_init(void)
 {
 	t_fine = 0x00;				//global used in compensation equations.
-
 
 	//wait a bit
 	BME280_dummyDelay(20000);
@@ -49,33 +52,28 @@ void BME280_init(void)
 	//constant outpput.  For 1x oversample, use 001
 	BME280_writeReg(BME280_REG_CTRL_HUM, 0x01);			//1x oversample - enabled.
 
+	//Based on the datasheet, the least amount of noise in the
+	//pressure sensor is with 16x oversampling on pressure, 2x OS on
+	//temperature, and IR filter coeff. of 16.
+	//
 	//#define BME280_REG_CTRL_MEAS	0xF4 - temp and pressure options.
-	//bits 7-5 - osrs_t - temp 001 - 1x sampling
-	//bits 4-2 - osrs_p - pressure 001 - 1x sampling
+	//bits 7-5 - osrs_t - temp 010 - 2x sampling
+	//bits 4-2 - osrs_p - pressure 101 - 16x sampling
 	//bits 1-0 - mode.  set to 11 for normal mode., set to 00 for sleep mode
-	//result = 00100100  = 0x24 - sleep
-	//	BME280_writeReg(BME280_REG_CTRL_MEAS, 0x24);		//enable and sleep
-
-	//try higher oversampling for pressure
-	//IR Filter disabled, oversample bits = 4, 100
-	//00110000 - sleep
-	BME280_writeReg(BME280_REG_CTRL_MEAS, 0x30);		//8x pressure SO enable and sleep
-
-
-
-
+	//result = 01010100  = 0x54 - sleep
+	BME280_writeReg(BME280_REG_CTRL_MEAS, 0x54);		//enable and sleep
 
 	//#define BME280_REG_CONFIG		0xF5
 	//readings should be while in sleep mode or
 	//else they are ignored.
-	//standby 10ms - 110
-	//filter settings - off - 000
+	//standby 0.5ms - 000
+	//filter settings - on - 16x -  100
 	//disable SPI - 0
-	//result - 1100 0000 = 0xC0
-	BME280_writeReg(BME280_REG_CONFIG, 0xC0);
+	//result - 0001 0000 = 0x10
+	BME280_writeReg(BME280_REG_CONFIG, 0x10);
 
 	//wakeup - bits 0 and 1 high for reg BME280_REG_CTRL_MEAS
-	BME280_writeReg(BME280_REG_CTRL_MEAS, 0x27);
+	BME280_writeReg(BME280_REG_CTRL_MEAS, 0x57);
 
 	//Load Calibration data into ram - loads mCalibrationData
 	BME280_readCalibrationValues();

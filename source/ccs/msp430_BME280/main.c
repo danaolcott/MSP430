@@ -17,9 +17,10 @@
 
 #include "TI_USCI_I2C_master.h"
 #include "i2c.h"
+#include "adc.h"
 #include "BME280.h"
 #include "ssd1306_lcd.h"
-
+#include "temp_sensor.h"
 /////////////////////////////////////////////////////
 /*
  * Notes:
@@ -39,7 +40,6 @@ void TimerA_init(void);
 void Interrupt_init(void);
 void LED_RED_TOGGLE(void);
 
-
 //global variables
 static volatile int TimeDelay;
 
@@ -52,14 +52,15 @@ void main(void)
 	TimerA_init();
 	GPIO_init();
 	Interrupt_init();
-
+	delay_ms(1000);
 	i2c_init(BME280_I2C_ADDRESS);		//check for the BME280
-	delay_ms(100);
+	delay_ms(200);
 	i2c_init(LCD_I2C_ADDRESS);			//check for the lcd
-
-	delay_ms(100);
+	delay_ms(200);
 	BME280_init();
-	delay_ms(100);
+	delay_ms(200);
+	adc_init();							//channel 5, P1.5 as ADC
+	temp_sensor_init();					//
 
 	LCD_Init();							//init the LCD
 	LCD_Clear(0x00);
@@ -72,14 +73,21 @@ void main(void)
 		//read the pressure, temperature, humidity
 		BME280_Data bmeData = BME280_read();
 
+		//read the external temp sensor
+		float extTemp = temp_sensor_readF();
+		int extTempInt = (int)extTemp;
+
+		int extTempFrac = (int)(extTemp * 10);
+		extTempFrac = extTempFrac % 10;
+
 		//output the results to the LCD
 		uint8_t buffer[64] = {0x00};
-		LCD_DrawStringKern(0, 3, "Temp (C:F)");
+		LCD_DrawStringKern(0, 3, "Temp (EXT)");
 		LCD_DrawStringKern(3, 4, "Press(kPa)");
 		LCD_DrawStringKern(6, 5, "Humidity");
 
-		int n = sprintf((char*)buffer, "%d.%d : %d.%d   ", (int)bmeData.cTemperatureCInt, (int)bmeData.cTemperatureCFrac,
-				(int)bmeData.cTemperatureFInt, (int)bmeData.cTemperatureFFrac);
+		int n = sprintf((char*)buffer, "%d.%d(%d.%d)   ", (int)bmeData.cTemperatureFInt, (int)bmeData.cTemperatureFFrac,
+				extTempInt, extTempFrac);
 
 		LCD_DrawStringKernLength(1, 3, buffer, n);
 
