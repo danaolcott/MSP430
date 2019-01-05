@@ -29,11 +29,17 @@ void i2c_init(uint8_t address7bit)
   //(7bits, not upshifted) and the prescale
   TI_USCI_I2C_transmitinit(address7bit,I2C_BUS_PRESCALE);
 
-  while ( TI_USCI_I2C_notready() );   //wait
+  while ( TI_USCI_I2C_notready() )
+  {
+	  P1OUT ^= BIT0;		//toggle the pin fast
+  }
 
   if (!TI_USCI_I2C_slave_present(address7bit))
   {
-    while(1);
+    while(1)
+    {
+    	P1OUT ^= BIT0;		//toggle the pin fast
+    }
   }
 
 }

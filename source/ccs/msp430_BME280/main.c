@@ -52,7 +52,15 @@ void main(void)
 	TimerA_init();
 	GPIO_init();
 	Interrupt_init();
-	delay_ms(1000);
+
+	//toggle the red led P1.0 a few times
+	int i = 0;
+	for (i = 0; i < 10; i++)
+	{
+		LED_RED_TOGGLE();
+		delay_ms(100);
+	}
+
 	i2c_init(BME280_I2C_ADDRESS);		//check for the BME280
 	delay_ms(200);
 	i2c_init(LCD_I2C_ADDRESS);			//check for the lcd
