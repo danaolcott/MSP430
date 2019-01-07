@@ -613,11 +613,12 @@ void nrf24_ISR(void)
             //output result
             n = sprintf(decimalBuffer, "RX(%d): ", pipe);
             UART_sendStringLength(decimalBuffer, n);                   //forward it to the uart
+
             UART_sendStringLength(rxBuffer, len);           //forward it to the uart
             UART_sendString("\r\n");
             
             //Testing - 0xFE, MID_ADC_TEMP1, LSB, MSB in millivolts
-            if ((rxBuffer[0] == 0xFE) & (rxBuffer[1] == MID_ADC_TEMP1))
+            if (rxBuffer[0] == 0xFE)
             {
                 adcLSB = (uint16_t)rxBuffer[2];
                 adcMSB = (uint16_t)rxBuffer[3];

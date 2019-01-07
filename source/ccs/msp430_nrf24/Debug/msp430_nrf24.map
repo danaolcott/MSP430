@@ -1,10 +1,10 @@
 ******************************************************************************
                   MSP430 Linker PC v4.4.5                      
 ******************************************************************************
->> Linked Sun Jan 06 19:03:05 2019
+>> Linked Sun Jan 06 19:49:32 2019
 
 OUTPUT FILE NAME:   <msp430_nrf24.out>
-ENTRY POINT SYMBOL: "_c_int00_noargs_noexit"  address: 0000ce18
+ENTRY POINT SYMBOL: "_c_int00_noargs_noexit"  address: 0000ce06
 
 
 MEMORY CONFIGURATION
@@ -19,7 +19,7 @@ MEMORY CONFIGURATION
   INFOC                 00001040   00000040  00000000  00000040  RWIX
   INFOB                 00001080   00000040  00000000  00000040  RWIX
   INFOA                 000010c0   00000040  00000000  00000040  RWIX
-  FLASH                 0000c000   00003fde  000010f2  00002eec  RWIX
+  FLASH                 0000c000   00003fde  000010e0  00002efe  RWIX
   BSLSIGNATURE          0000ffde   00000002  00000002  00000000  RWIX  ffff 
   INT00                 0000ffe0   00000002  00000002  00000000  RWIX
   INT01                 0000ffe2   00000002  00000000  00000002  RWIX
@@ -61,89 +61,89 @@ section   page    origin      length       input sections
                   00000360    00000002     rts430_eabi.lib : boot.obj (.stack)
                   00000362    0000009e     --HOLE--
 
-.text      0    0000c000    00000fb6     
-                  0000c000    00000158     nrf24l01.obj (.text:nrf24_ISR)
-                  0000c158    00000116     rts430_eabi.lib : _printfi_min.obj (.text:_setfield)
-                  0000c26e    000000e0     nrf24l01.obj (.text:nrf24_init)
-                  0000c34e    000000d8     usart.obj (.text:USCI0RX_ISR)
-                  0000c426    000000ca     rts430_eabi.lib : _printfi_min.obj (.text:__TI_printfi_minimal)
-                  0000c4f0    000000ac     utility.obj (.text:utility_decimal2Buffer)
-                  0000c59c    0000008c     spi.obj (.text:SPI_init)
-                  0000c628    00000064     rts430_eabi.lib : copy_decompress_rle.obj (.text:__TI_decompress_rle_core)
-                  0000c68c    00000058                     : autoinit.obj (.text:_auto_init)
-                  0000c6e4    00000056                     : _printfi_min.obj (.text:_ltostr)
-                  0000c73a    00000056     usart.obj (.text:usart_init)
-                  0000c790    00000050     main.obj (.text:main)
-                  0000c7e0    0000004e     rts430_eabi.lib : _printfi_min.obj (.text:_pproc_diouxp)
-                  0000c82e    0000004e     nrf24l01.obj (.text:nrf24_writeCmd)
-                  0000c87c    0000004c     nrf24l01.obj (.text:nrf24_readRxData)
-                  0000c8c8    0000004c     nrf24l01.obj (.text:nrf24_readRxPayLoad)
-                  0000c914    0000004c     rts430_eabi.lib : lsr16.obj (.text)
-                  0000c960    00000048                     : _printfi_min.obj (.text:_pproc_str)
-                  0000c9a8    00000046     timer.obj (.text:Timer_init)
-                  0000c9ee    00000038     main.obj (.text:Port_1)
-                  0000ca26    00000038     usart.obj (.text:UART_sendString)
-                  0000ca5e    00000038     nrf24l01.obj (.text:nrf24_dummyDelay)
-                  0000ca96    00000038     rts430_eabi.lib : sprintf.obj (.text:sprintf)
-                  0000cace    00000038     usart.obj (.text:usart_writeString)
-                  0000cb06    00000034     usart.obj (.text:UART_sendStringLength)
-                  0000cb3a    00000034     nrf24l01.obj (.text:nrf24_getRxPayLoadSize)
-                  0000cb6e    00000034     nrf24l01.obj (.text:nrf24_readReg)
-                  0000cba2    00000034     nrf24l01.obj (.text:nrf24_writeReg)
-                  0000cbd6    00000034     usart.obj (.text:usart_writeStringLength)
-                  0000cc0a    00000030     spi.obj (.text:SPI_tx)
-                  0000cc3a    00000030     nrf24l01.obj (.text:nrf24_getRxPipeToRead)
-                  0000cc6a    0000002e     rts430_eabi.lib : _printfi_min.obj (.text:_getarg_diouxp)
-                  0000cc98    0000002e     nrf24l01.obj (.text:nrf24_prime_rx_bit)
-                  0000ccc6    0000002c     nrf24l01.obj (.text:nrf24_RxFifoHasData)
-                  0000ccf2    0000002c     rts430_eabi.lib : div16s.obj (.text)
-                  0000cd1e    0000002a     spi.obj (.text:SPI_rx)
-                  0000cd48    00000028     main.obj (.text:GPIO_init)
-                  0000cd70    00000028     usart.obj (.text:usart_processCommand)
-                  0000cd98    00000026     nrf24l01.obj (.text:nrf24_power_up)
-                  0000cdbe    00000022     timer.obj (.text:Timer_A)
-                  0000cde0    0000001e     nrf24l01.obj (.text:nrf24_getStatus)
-                  0000cdfe    0000001a     timer.obj (.text:Timer_delay_ms)
-                  0000ce18    0000001a     rts430_eabi.lib : boot_special.obj (.text:_c_int00_noargs_noexit)
-                  0000ce32    0000001a                     : sprintf.obj (.text:_outs)
-                  0000ce4c    0000001a                     : memccpy.obj (.text:memccpy)
-                  0000ce66    00000018     main.obj (.text:Interrupt_init)
-                  0000ce7e    00000018     rts430_eabi.lib : _printfi_min.obj (.text:_div)
-                  0000ce96    00000016     nrf24l01.obj (.text:nrf24_flushRx)
-                  0000ceac    00000016     nrf24l01.obj (.text:nrf24_flushTx)
-                  0000cec2    00000016     rts430_eabi.lib : div16u.obj (.text)
-                  0000ced8    00000014                     : copy_zero_init.obj (.text:decompress:ZI:__TI_zero_init)
-                  0000ceec    00000014                     : memset.obj (.text:memset)
-                  0000cf00    00000014                     : mult16.obj (.text)
-                  0000cf14    00000012                     : sprintf.obj (.text:_outc)
-                  0000cf26    00000012                     : copy_decompress_none.obj (.text:decompress:none:__TI_decompress_none)
-                  0000cf38    00000012                     : memcpy.obj (.text:memcpy)
-                  0000cf4a    00000010                     : epilog.obj (.text)
-                  0000cf5a    0000000e                     : strlen.obj (.text:strlen)
-                  0000cf68    0000000c     timer.obj (.text:Timer_Counter1Decrement)
-                  0000cf74    0000000c     timer.obj (.text:Timer_DelayDecrement)
-                  0000cf80    00000008     spi.obj (.text:SPI_deselect)
-                  0000cf88    00000008     spi.obj (.text:SPI_select)
-                  0000cf90    00000006     main.obj (.text:LED_Red_Toggle)
-                  0000cf96    00000006     rts430_eabi.lib : isr_trap.obj (.text:_isr:__TI_ISR_TRAP)
-                  0000cf9c    00000006                     : copy_decompress_rle.obj (.text:decompress:rle24:__TI_decompress_rle24)
-                  0000cfa2    00000006     nrf24l01.obj (.text:nrf24_ce_high)
-                  0000cfa8    00000006     nrf24l01.obj (.text:nrf24_ce_low)
-                  0000cfae    00000004     rts430_eabi.lib : pre_init.obj (.text:_system_pre_init)
-                  0000cfb2    00000004                     : exit.obj (.text:abort)
+.text      0    0000c000    00000fa4     
+                  0000c000    00000146     nrf24l01.obj (.text:nrf24_ISR)
+                  0000c146    00000116     rts430_eabi.lib : _printfi_min.obj (.text:_setfield)
+                  0000c25c    000000e0     nrf24l01.obj (.text:nrf24_init)
+                  0000c33c    000000d8     usart.obj (.text:USCI0RX_ISR)
+                  0000c414    000000ca     rts430_eabi.lib : _printfi_min.obj (.text:__TI_printfi_minimal)
+                  0000c4de    000000ac     utility.obj (.text:utility_decimal2Buffer)
+                  0000c58a    0000008c     spi.obj (.text:SPI_init)
+                  0000c616    00000064     rts430_eabi.lib : copy_decompress_rle.obj (.text:__TI_decompress_rle_core)
+                  0000c67a    00000058                     : autoinit.obj (.text:_auto_init)
+                  0000c6d2    00000056                     : _printfi_min.obj (.text:_ltostr)
+                  0000c728    00000056     usart.obj (.text:usart_init)
+                  0000c77e    00000050     main.obj (.text:main)
+                  0000c7ce    0000004e     rts430_eabi.lib : _printfi_min.obj (.text:_pproc_diouxp)
+                  0000c81c    0000004e     nrf24l01.obj (.text:nrf24_writeCmd)
+                  0000c86a    0000004c     nrf24l01.obj (.text:nrf24_readRxData)
+                  0000c8b6    0000004c     nrf24l01.obj (.text:nrf24_readRxPayLoad)
+                  0000c902    0000004c     rts430_eabi.lib : lsr16.obj (.text)
+                  0000c94e    00000048                     : _printfi_min.obj (.text:_pproc_str)
+                  0000c996    00000046     timer.obj (.text:Timer_init)
+                  0000c9dc    00000038     main.obj (.text:Port_1)
+                  0000ca14    00000038     usart.obj (.text:UART_sendString)
+                  0000ca4c    00000038     nrf24l01.obj (.text:nrf24_dummyDelay)
+                  0000ca84    00000038     rts430_eabi.lib : sprintf.obj (.text:sprintf)
+                  0000cabc    00000038     usart.obj (.text:usart_writeString)
+                  0000caf4    00000034     usart.obj (.text:UART_sendStringLength)
+                  0000cb28    00000034     nrf24l01.obj (.text:nrf24_getRxPayLoadSize)
+                  0000cb5c    00000034     nrf24l01.obj (.text:nrf24_readReg)
+                  0000cb90    00000034     nrf24l01.obj (.text:nrf24_writeReg)
+                  0000cbc4    00000034     usart.obj (.text:usart_writeStringLength)
+                  0000cbf8    00000030     spi.obj (.text:SPI_tx)
+                  0000cc28    00000030     nrf24l01.obj (.text:nrf24_getRxPipeToRead)
+                  0000cc58    0000002e     rts430_eabi.lib : _printfi_min.obj (.text:_getarg_diouxp)
+                  0000cc86    0000002e     nrf24l01.obj (.text:nrf24_prime_rx_bit)
+                  0000ccb4    0000002c     nrf24l01.obj (.text:nrf24_RxFifoHasData)
+                  0000cce0    0000002c     rts430_eabi.lib : div16s.obj (.text)
+                  0000cd0c    0000002a     spi.obj (.text:SPI_rx)
+                  0000cd36    00000028     main.obj (.text:GPIO_init)
+                  0000cd5e    00000028     usart.obj (.text:usart_processCommand)
+                  0000cd86    00000026     nrf24l01.obj (.text:nrf24_power_up)
+                  0000cdac    00000022     timer.obj (.text:Timer_A)
+                  0000cdce    0000001e     nrf24l01.obj (.text:nrf24_getStatus)
+                  0000cdec    0000001a     timer.obj (.text:Timer_delay_ms)
+                  0000ce06    0000001a     rts430_eabi.lib : boot_special.obj (.text:_c_int00_noargs_noexit)
+                  0000ce20    0000001a                     : sprintf.obj (.text:_outs)
+                  0000ce3a    0000001a                     : memccpy.obj (.text:memccpy)
+                  0000ce54    00000018     main.obj (.text:Interrupt_init)
+                  0000ce6c    00000018     rts430_eabi.lib : _printfi_min.obj (.text:_div)
+                  0000ce84    00000016     nrf24l01.obj (.text:nrf24_flushRx)
+                  0000ce9a    00000016     nrf24l01.obj (.text:nrf24_flushTx)
+                  0000ceb0    00000016     rts430_eabi.lib : div16u.obj (.text)
+                  0000cec6    00000014                     : copy_zero_init.obj (.text:decompress:ZI:__TI_zero_init)
+                  0000ceda    00000014                     : memset.obj (.text:memset)
+                  0000ceee    00000014                     : mult16.obj (.text)
+                  0000cf02    00000012                     : sprintf.obj (.text:_outc)
+                  0000cf14    00000012                     : copy_decompress_none.obj (.text:decompress:none:__TI_decompress_none)
+                  0000cf26    00000012                     : memcpy.obj (.text:memcpy)
+                  0000cf38    00000010                     : epilog.obj (.text)
+                  0000cf48    0000000e                     : strlen.obj (.text:strlen)
+                  0000cf56    0000000c     timer.obj (.text:Timer_Counter1Decrement)
+                  0000cf62    0000000c     timer.obj (.text:Timer_DelayDecrement)
+                  0000cf6e    00000008     spi.obj (.text:SPI_deselect)
+                  0000cf76    00000008     spi.obj (.text:SPI_select)
+                  0000cf7e    00000006     main.obj (.text:LED_Red_Toggle)
+                  0000cf84    00000006     rts430_eabi.lib : isr_trap.obj (.text:_isr:__TI_ISR_TRAP)
+                  0000cf8a    00000006                     : copy_decompress_rle.obj (.text:decompress:rle24:__TI_decompress_rle24)
+                  0000cf90    00000006     nrf24l01.obj (.text:nrf24_ce_high)
+                  0000cf96    00000006     nrf24l01.obj (.text:nrf24_ce_low)
+                  0000cf9c    00000004     rts430_eabi.lib : pre_init.obj (.text:_system_pre_init)
+                  0000cfa0    00000004                     : exit.obj (.text:abort)
 
-.const     0    0000cfb6    00000122     
-                  0000cfb6    000000f8     nrf24l01.obj (.const:.string)
-                  0000d0ae    00000014     rts430_eabi.lib : _printfi_min.obj (.const:.string)
-                  0000d0c2    00000010     main.obj (.const:.string)
-                  0000d0d2    00000006     usart.obj (.const:.string)
+.const     0    0000cfa4    00000122     
+                  0000cfa4    000000f8     nrf24l01.obj (.const:.string)
+                  0000d09c    00000014     rts430_eabi.lib : _printfi_min.obj (.const:.string)
+                  0000d0b0    00000010     main.obj (.const:.string)
+                  0000d0c0    00000006     usart.obj (.const:.string)
 
-.cinit     0    0000d0d8    0000001a     
-                  0000d0d8    00000007     (.cinit..data.load) [load image]
-                  0000d0df    00000001     --HOLE-- [fill = 0]
-                  0000d0e0    00000006     (__TI_handler_table)
-                  0000d0e6    00000004     (.cinit..bss.load) [load image, compression = zero_init]
-                  0000d0ea    00000008     (__TI_cinit_table)
+.cinit     0    0000d0c6    0000001a     
+                  0000d0c6    00000007     (.cinit..data.load) [load image]
+                  0000d0cd    00000001     --HOLE-- [fill = 0]
+                  0000d0ce    00000006     (__TI_handler_table)
+                  0000d0d4    00000004     (.cinit..bss.load) [load image, compression = zero_init]
+                  0000d0d8    00000008     (__TI_cinit_table)
 
 .init_array 
 *          0    0000c000    00000000     UNINITIALIZED
@@ -203,14 +203,14 @@ NMI        0    0000fffc    00000002
 
 LINKER GENERATED COPY TABLES
 
-__TI_cinit_table @ 0000d0ea records: 2, size/record: 4, table size: 8
-	.data: load addr=0000d0d8, load size=00000007 bytes, run addr=00000244, run size=00000003 bytes, compression=copy
-	.bss: load addr=0000d0e6, load size=00000004 bytes, run addr=00000200, run size=00000044 bytes, compression=zero_init
+__TI_cinit_table @ 0000d0d8 records: 2, size/record: 4, table size: 8
+	.data: load addr=0000d0c6, load size=00000007 bytes, run addr=00000244, run size=00000003 bytes, compression=copy
+	.bss: load addr=0000d0d4, load size=00000004 bytes, run addr=00000200, run size=00000044 bytes, compression=zero_init
 
 
 LINKER GENERATED HANDLER TABLE
 
-__TI_handler_table @ 0000d0e0 records: 3, size/record: 2, table size: 6
+__TI_handler_table @ 0000d0ce records: 3, size/record: 2, table size: 6
 	index: 0, handler: __TI_zero_init
 	index: 1, handler: __TI_decompress_rle24
 	index: 2, handler: __TI_decompress_none
@@ -230,7 +230,7 @@ address   name
 00000057  BCSCTL1                 
 00000058  BCSCTL2                 
 00000053  BCSCTL3                 
-0000cfb2  C$$EXIT                 
+0000cfa0  C$$EXIT                 
 00000059  CACTL1                  
 0000005a  CACTL2                  
 000010fb  CALBC1_12MHZ            
@@ -246,13 +246,13 @@ address   name
 00000128  FCTL1                   
 0000012a  FCTL2                   
 0000012c  FCTL3                   
-0000cd48  GPIO_init               
+0000cd36  GPIO_init               
 00000000  IE1                     
 00000001  IE2                     
 00000002  IFG1                    
 00000003  IFG2                    
-0000ce66  Interrupt_init          
-0000cf90  LED_Red_Toggle          
+0000ce54  Interrupt_init          
+0000cf7e  LED_Red_Toggle          
 00000022  P1DIR                   
 00000025  P1IE                    
 00000024  P1IES                   
@@ -277,12 +277,12 @@ address   name
 00000010  P3REN                   
 0000001b  P3SEL                   
 00000043  P3SEL2                  
-0000c9ee  Port_1                  
-0000cf80  SPI_deselect            
-0000c59c  SPI_init                
-0000cd1e  SPI_rx                  
-0000cf88  SPI_select              
-0000cc0a  SPI_tx                  
+0000c9dc  Port_1                  
+0000cf6e  SPI_deselect            
+0000c58a  SPI_init                
+0000cd0c  SPI_rx                  
+0000cf76  SPI_select              
+0000cbf8  SPI_tx                  
 00000172  TA0CCR0                 
 00000174  TA0CCR1                 
 00000176  TA0CCR2                 
@@ -306,13 +306,13 @@ address   name
 000010c0  TLV_CHECKSUM            
 000010f7  TLV_DCO_30_LEN          
 000010f6  TLV_DCO_30_TAG          
-0000cdbe  Timer_A                 
-0000cf68  Timer_Counter1Decrement 
-0000cf74  Timer_DelayDecrement    
-0000cdfe  Timer_delay_ms          
-0000c9a8  Timer_init              
-0000ca26  UART_sendString         
-0000cb06  UART_sendStringLength   
+0000cdac  Timer_A                 
+0000cf56  Timer_Counter1Decrement 
+0000cf62  Timer_DelayDecrement    
+0000cdec  Timer_delay_ms          
+0000c996  Timer_init              
+0000ca14  UART_sendString         
+0000caf4  UART_sendStringLength   
 0000005d  UCA0ABCTL               
 00000062  UCA0BR0                 
 00000063  UCA0BR1                 
@@ -334,19 +334,19 @@ address   name
 0000006e  UCB0RXBUF               
 0000006d  UCB0STAT                
 0000006f  UCB0TXBUF               
-0000c34e  USCI0RX_ISR             
+0000c33c  USCI0RX_ISR             
 00000120  WDTCTL                  
 00000400  __STACK_END             
 000000a0  __STACK_SIZE            
-0000d0ea  __TI_CINIT_Base         
-0000d0f2  __TI_CINIT_Limit        
-0000d0e0  __TI_Handler_Table_Base 
-0000d0e6  __TI_Handler_Table_Limit
+0000d0d8  __TI_CINIT_Base         
+0000d0e0  __TI_CINIT_Limit        
+0000d0ce  __TI_Handler_Table_Base 
+0000d0d4  __TI_Handler_Table_Limit
 UNDEFED   __TI_INITARRAY_Base     
 UNDEFED   __TI_INITARRAY_Limit    
-0000cf96  __TI_ISR_TRAP           
-0000cf26  __TI_decompress_none    
-0000cf9c  __TI_decompress_rle24   
+0000cf84  __TI_ISR_TRAP           
+0000cf14  __TI_decompress_none    
+0000cf8a  __TI_decompress_rle24   
 0000ffe0  __TI_int00              
 0000ffe4  __TI_int02              
 0000ffe6  __TI_int03              
@@ -360,77 +360,77 @@ UNDEFED   __TI_INITARRAY_Limit
 0000fff8  __TI_int12              
 0000fffa  __TI_int13              
 0000fffc  __TI_int14              
-0000c426  __TI_printfi_minimal    
-0000ced8  __TI_zero_init          
+0000c414  __TI_printfi_minimal    
+0000cec6  __TI_zero_init          
 ffffffff  __binit__               
 ffffffff  __c_args__              
-0000ccf2  __mspabi_divi           
-0000cec2  __mspabi_divu           
-0000cf56  __mspabi_func_epilog_1  
-0000cf54  __mspabi_func_epilog_2  
-0000cf52  __mspabi_func_epilog_3  
-0000cf50  __mspabi_func_epilog_4  
-0000cf4e  __mspabi_func_epilog_5  
-0000cf4c  __mspabi_func_epilog_6  
-0000cf4a  __mspabi_func_epilog_7  
-0000cf00  __mspabi_mpyi           
-0000cf00  __mspabi_mpyi_sw        
-0000ccf2  __mspabi_remi           
-0000cec2  __mspabi_remu           
-0000c914  __mspabi_srli           
-0000c95a  __mspabi_srli_1         
-0000c936  __mspabi_srli_10        
-0000c932  __mspabi_srli_11        
-0000c92e  __mspabi_srli_12        
-0000c92a  __mspabi_srli_13        
-0000c926  __mspabi_srli_14        
-0000c922  __mspabi_srli_15        
-0000c956  __mspabi_srli_2         
-0000c952  __mspabi_srli_3         
-0000c94e  __mspabi_srli_4         
-0000c94a  __mspabi_srli_5         
-0000c946  __mspabi_srli_6         
-0000c942  __mspabi_srli_7         
-0000c93e  __mspabi_srli_8         
-0000c93a  __mspabi_srli_9         
-0000c68c  _auto_init              
-0000ce18  _c_int00_noargs_noexit  
+0000cce0  __mspabi_divi           
+0000ceb0  __mspabi_divu           
+0000cf44  __mspabi_func_epilog_1  
+0000cf42  __mspabi_func_epilog_2  
+0000cf40  __mspabi_func_epilog_3  
+0000cf3e  __mspabi_func_epilog_4  
+0000cf3c  __mspabi_func_epilog_5  
+0000cf3a  __mspabi_func_epilog_6  
+0000cf38  __mspabi_func_epilog_7  
+0000ceee  __mspabi_mpyi           
+0000ceee  __mspabi_mpyi_sw        
+0000cce0  __mspabi_remi           
+0000ceb0  __mspabi_remu           
+0000c902  __mspabi_srli           
+0000c948  __mspabi_srli_1         
+0000c924  __mspabi_srli_10        
+0000c920  __mspabi_srli_11        
+0000c91c  __mspabi_srli_12        
+0000c918  __mspabi_srli_13        
+0000c914  __mspabi_srli_14        
+0000c910  __mspabi_srli_15        
+0000c944  __mspabi_srli_2         
+0000c940  __mspabi_srli_3         
+0000c93c  __mspabi_srli_4         
+0000c938  __mspabi_srli_5         
+0000c934  __mspabi_srli_6         
+0000c930  __mspabi_srli_7         
+0000c92c  __mspabi_srli_8         
+0000c928  __mspabi_srli_9         
+0000c67a  _auto_init              
+0000ce06  _c_int00_noargs_noexit  
 0000fffe  _reset_vector           
 00000360  _stack                  
-0000cfae  _system_pre_init        
-0000cfb2  abort                   
+0000cf9c  _system_pre_init        
+0000cfa0  abort                   
 ffffffff  binit                   
-0000c790  main                    
-0000ce4c  memccpy                 
-0000cf38  memcpy                  
-0000ceec  memset                  
+0000c77e  main                    
+0000ce3a  memccpy                 
+0000cf26  memcpy                  
+0000ceda  memset                  
 0000c000  nrf24_ISR               
-0000ccc6  nrf24_RxFifoHasData     
-0000cfa2  nrf24_ce_high           
-0000cfa8  nrf24_ce_low            
-0000ca5e  nrf24_dummyDelay        
-0000ce96  nrf24_flushRx           
-0000ceac  nrf24_flushTx           
-0000cb3a  nrf24_getRxPayLoadSize  
-0000cc3a  nrf24_getRxPipeToRead   
-0000cde0  nrf24_getStatus         
-0000c26e  nrf24_init              
-0000cd98  nrf24_power_up          
-0000cc98  nrf24_prime_rx_bit      
-0000cb6e  nrf24_readReg           
-0000c87c  nrf24_readRxData        
-0000c8c8  nrf24_readRxPayLoad     
-0000c82e  nrf24_writeCmd          
-0000cba2  nrf24_writeReg          
+0000ccb4  nrf24_RxFifoHasData     
+0000cf90  nrf24_ce_high           
+0000cf96  nrf24_ce_low            
+0000ca4c  nrf24_dummyDelay        
+0000ce84  nrf24_flushRx           
+0000ce9a  nrf24_flushTx           
+0000cb28  nrf24_getRxPayLoadSize  
+0000cc28  nrf24_getRxPipeToRead   
+0000cdce  nrf24_getStatus         
+0000c25c  nrf24_init              
+0000cd86  nrf24_power_up          
+0000cc86  nrf24_prime_rx_bit      
+0000cb5c  nrf24_readReg           
+0000c86a  nrf24_readRxData        
+0000c8b6  nrf24_readRxPayLoad     
+0000c81c  nrf24_writeCmd          
+0000cb90  nrf24_writeReg          
 00000200  rxBuffer1               
 00000220  rxBuffer2               
-0000ca96  sprintf                 
-0000cf5a  strlen                  
-0000c73a  usart_init              
-0000cd70  usart_processCommand    
-0000cace  usart_writeString       
-0000cbd6  usart_writeStringLength 
-0000c4f0  utility_decimal2Buffer  
+0000ca84  sprintf                 
+0000cf48  strlen                  
+0000c728  usart_init              
+0000cd5e  usart_processCommand    
+0000cabc  usart_writeString       
+0000cbc4  usart_writeStringLength 
+0000c4de  utility_decimal2Buffer  
 
 
 GLOBAL SYMBOLS: SORTED BY Symbol Address 
@@ -541,94 +541,94 @@ address   name
 000010fe  CALDCO_1MHZ             
 000010ff  CALBC1_1MHZ             
 0000c000  nrf24_ISR               
-0000c26e  nrf24_init              
-0000c34e  USCI0RX_ISR             
-0000c426  __TI_printfi_minimal    
-0000c4f0  utility_decimal2Buffer  
-0000c59c  SPI_init                
-0000c68c  _auto_init              
-0000c73a  usart_init              
-0000c790  main                    
-0000c82e  nrf24_writeCmd          
-0000c87c  nrf24_readRxData        
-0000c8c8  nrf24_readRxPayLoad     
-0000c914  __mspabi_srli           
-0000c922  __mspabi_srli_15        
-0000c926  __mspabi_srli_14        
-0000c92a  __mspabi_srli_13        
-0000c92e  __mspabi_srli_12        
-0000c932  __mspabi_srli_11        
-0000c936  __mspabi_srli_10        
-0000c93a  __mspabi_srli_9         
-0000c93e  __mspabi_srli_8         
-0000c942  __mspabi_srli_7         
-0000c946  __mspabi_srli_6         
-0000c94a  __mspabi_srli_5         
-0000c94e  __mspabi_srli_4         
-0000c952  __mspabi_srli_3         
-0000c956  __mspabi_srli_2         
-0000c95a  __mspabi_srli_1         
-0000c9a8  Timer_init              
-0000c9ee  Port_1                  
-0000ca26  UART_sendString         
-0000ca5e  nrf24_dummyDelay        
-0000ca96  sprintf                 
-0000cace  usart_writeString       
-0000cb06  UART_sendStringLength   
-0000cb3a  nrf24_getRxPayLoadSize  
-0000cb6e  nrf24_readReg           
-0000cba2  nrf24_writeReg          
-0000cbd6  usart_writeStringLength 
-0000cc0a  SPI_tx                  
-0000cc3a  nrf24_getRxPipeToRead   
-0000cc98  nrf24_prime_rx_bit      
-0000ccc6  nrf24_RxFifoHasData     
-0000ccf2  __mspabi_divi           
-0000ccf2  __mspabi_remi           
-0000cd1e  SPI_rx                  
-0000cd48  GPIO_init               
-0000cd70  usart_processCommand    
-0000cd98  nrf24_power_up          
-0000cdbe  Timer_A                 
-0000cde0  nrf24_getStatus         
-0000cdfe  Timer_delay_ms          
-0000ce18  _c_int00_noargs_noexit  
-0000ce4c  memccpy                 
-0000ce66  Interrupt_init          
-0000ce96  nrf24_flushRx           
-0000ceac  nrf24_flushTx           
-0000cec2  __mspabi_divu           
-0000cec2  __mspabi_remu           
-0000ced8  __TI_zero_init          
-0000ceec  memset                  
-0000cf00  __mspabi_mpyi           
-0000cf00  __mspabi_mpyi_sw        
-0000cf26  __TI_decompress_none    
-0000cf38  memcpy                  
-0000cf4a  __mspabi_func_epilog_7  
-0000cf4c  __mspabi_func_epilog_6  
-0000cf4e  __mspabi_func_epilog_5  
-0000cf50  __mspabi_func_epilog_4  
-0000cf52  __mspabi_func_epilog_3  
-0000cf54  __mspabi_func_epilog_2  
-0000cf56  __mspabi_func_epilog_1  
-0000cf5a  strlen                  
-0000cf68  Timer_Counter1Decrement 
-0000cf74  Timer_DelayDecrement    
-0000cf80  SPI_deselect            
-0000cf88  SPI_select              
-0000cf90  LED_Red_Toggle          
-0000cf96  __TI_ISR_TRAP           
-0000cf9c  __TI_decompress_rle24   
-0000cfa2  nrf24_ce_high           
-0000cfa8  nrf24_ce_low            
-0000cfae  _system_pre_init        
-0000cfb2  C$$EXIT                 
-0000cfb2  abort                   
-0000d0e0  __TI_Handler_Table_Base 
-0000d0e6  __TI_Handler_Table_Limit
-0000d0ea  __TI_CINIT_Base         
-0000d0f2  __TI_CINIT_Limit        
+0000c25c  nrf24_init              
+0000c33c  USCI0RX_ISR             
+0000c414  __TI_printfi_minimal    
+0000c4de  utility_decimal2Buffer  
+0000c58a  SPI_init                
+0000c67a  _auto_init              
+0000c728  usart_init              
+0000c77e  main                    
+0000c81c  nrf24_writeCmd          
+0000c86a  nrf24_readRxData        
+0000c8b6  nrf24_readRxPayLoad     
+0000c902  __mspabi_srli           
+0000c910  __mspabi_srli_15        
+0000c914  __mspabi_srli_14        
+0000c918  __mspabi_srli_13        
+0000c91c  __mspabi_srli_12        
+0000c920  __mspabi_srli_11        
+0000c924  __mspabi_srli_10        
+0000c928  __mspabi_srli_9         
+0000c92c  __mspabi_srli_8         
+0000c930  __mspabi_srli_7         
+0000c934  __mspabi_srli_6         
+0000c938  __mspabi_srli_5         
+0000c93c  __mspabi_srli_4         
+0000c940  __mspabi_srli_3         
+0000c944  __mspabi_srli_2         
+0000c948  __mspabi_srli_1         
+0000c996  Timer_init              
+0000c9dc  Port_1                  
+0000ca14  UART_sendString         
+0000ca4c  nrf24_dummyDelay        
+0000ca84  sprintf                 
+0000cabc  usart_writeString       
+0000caf4  UART_sendStringLength   
+0000cb28  nrf24_getRxPayLoadSize  
+0000cb5c  nrf24_readReg           
+0000cb90  nrf24_writeReg          
+0000cbc4  usart_writeStringLength 
+0000cbf8  SPI_tx                  
+0000cc28  nrf24_getRxPipeToRead   
+0000cc86  nrf24_prime_rx_bit      
+0000ccb4  nrf24_RxFifoHasData     
+0000cce0  __mspabi_divi           
+0000cce0  __mspabi_remi           
+0000cd0c  SPI_rx                  
+0000cd36  GPIO_init               
+0000cd5e  usart_processCommand    
+0000cd86  nrf24_power_up          
+0000cdac  Timer_A                 
+0000cdce  nrf24_getStatus         
+0000cdec  Timer_delay_ms          
+0000ce06  _c_int00_noargs_noexit  
+0000ce3a  memccpy                 
+0000ce54  Interrupt_init          
+0000ce84  nrf24_flushRx           
+0000ce9a  nrf24_flushTx           
+0000ceb0  __mspabi_divu           
+0000ceb0  __mspabi_remu           
+0000cec6  __TI_zero_init          
+0000ceda  memset                  
+0000ceee  __mspabi_mpyi           
+0000ceee  __mspabi_mpyi_sw        
+0000cf14  __TI_decompress_none    
+0000cf26  memcpy                  
+0000cf38  __mspabi_func_epilog_7  
+0000cf3a  __mspabi_func_epilog_6  
+0000cf3c  __mspabi_func_epilog_5  
+0000cf3e  __mspabi_func_epilog_4  
+0000cf40  __mspabi_func_epilog_3  
+0000cf42  __mspabi_func_epilog_2  
+0000cf44  __mspabi_func_epilog_1  
+0000cf48  strlen                  
+0000cf56  Timer_Counter1Decrement 
+0000cf62  Timer_DelayDecrement    
+0000cf6e  SPI_deselect            
+0000cf76  SPI_select              
+0000cf7e  LED_Red_Toggle          
+0000cf84  __TI_ISR_TRAP           
+0000cf8a  __TI_decompress_rle24   
+0000cf90  nrf24_ce_high           
+0000cf96  nrf24_ce_low            
+0000cf9c  _system_pre_init        
+0000cfa0  C$$EXIT                 
+0000cfa0  abort                   
+0000d0ce  __TI_Handler_Table_Base 
+0000d0d4  __TI_Handler_Table_Limit
+0000d0d8  __TI_CINIT_Base         
+0000d0e0  __TI_CINIT_Limit        
 0000ffe0  __TI_int00              
 0000ffe4  __TI_int02              
 0000ffe6  __TI_int03              
