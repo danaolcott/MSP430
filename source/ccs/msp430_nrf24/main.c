@@ -55,18 +55,20 @@ int main(void)
 	GPIO_init();		//leds and buttons
 	Interrupt_init();	//button interrupts
 	usart_init();		//
-	spi_init(SPI_SPEED_1MHZ);
+	SPI_init(SPI_SPEED_1MHZ);
 	Timer_init();
-	nrf24_init(NRF24_MODE_TX);
+	nrf24_init(NRF24_MODE_RX);
 
 	int counter = 0;
-	int n = 0x00;
-	uint8_t txBuffer[8] = "Message1";
+//	int n = 0x00;
+//	uint8_t txBuffer[8] = "Message1";
 
 	while (1)
 	{
 		LED_Red_Toggle();
-		nrf24_transmitData(txBuffer, 8);
+//		nrf24_transmitData(txBuffer, 8);
+		if (!(counter % 10))
+			UART_sendString("Listening...\r\n");
 
 		Timer_delay_ms(2000);
 

@@ -25,7 +25,7 @@
 // * P1.7 - UCA0SIMO - slave in master out
 // * P2.4 - CS Pin
 //
-void spi_init(SPISpeed_t speed)
+void SPI_init(SPISpeed_t speed)
 {
 	uint8_t lowByte = 0x00;
 	uint8_t highByte = 0x00;
@@ -113,18 +113,18 @@ void spi_init(SPISpeed_t speed)
     UCB0CTL1 &= ~UCSWRST;                     // **Initialize USCI state machine**
 
 	//deselect the device
-    spi_deselect();
+    SPI_deselect();
 
 }
 
 
 
-void spi_select(void)
+void SPI_select(void)
 {
 	P2OUT &=~ SPI_CS_PIN;
 }
 
-void spi_deselect(void)
+void SPI_deselect(void)
 {
 	P2OUT |= SPI_CS_PIN;
 }
@@ -133,7 +133,7 @@ void spi_deselect(void)
 
 ////////////////////////////////////
 //transmit 1 byte with no cs control
-uint8_t spi_tx(uint8_t data)
+uint8_t SPI_tx(uint8_t data)
 {
     while (!(IFG2 & UCB0TXIFG));   // USCI_A0 TX buffer ready?
 
@@ -151,7 +151,7 @@ uint8_t spi_tx(uint8_t data)
 
 ////////////////////////////////////
 //read 1 byte with no cs control
-uint8_t spi_rx(void)
+uint8_t SPI_rx(void)
 {
     while (!(IFG2 & UCB0TXIFG));   // USCI_A0 TX buffer ready?
 
@@ -169,31 +169,31 @@ uint8_t spi_rx(void)
 
 
 
-void spi_write(uint8_t data)
+void SPI_write(uint8_t data)
 {
-	spi_select();
-	spi_tx(data);
-    spi_deselect();
+	SPI_select();
+	SPI_tx(data);
+    SPI_deselect();
 }
 
-void spi_writeArray(uint8_t* buffer, uint8_t length)
+void SPI_writeArray(uint8_t* buffer, uint8_t length)
 {
 	uint8_t i = 0;
 
-	spi_select();
+	SPI_select();
 
 	for (i = 0 ; i < length ; i++)
-		spi_tx(buffer[i]);
+		SPI_tx(buffer[i]);
 
-	spi_deselect();
+	SPI_deselect();
 }
 
 
-uint8_t spi_read(void)
+uint8_t SPI_read(void)
 {
-	spi_select();
-	uint8_t data = spi_rx();
-    spi_deselect();
+	SPI_select();
+	uint8_t data = SPI_rx();
+    SPI_deselect();
 
     return data;
 }

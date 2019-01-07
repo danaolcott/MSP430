@@ -11,6 +11,9 @@ void usart_writeString(uint8_t* buffer);
 void usart_writeStringLength(uint8_t* buffer, uint8_t size);
 void usart_processCommand(uint8_t* buffer, uint8_t len);
 
+//for compatability
+void UART_sendString(uint8_t* buffer);
+void UART_sendStringLength(uint8_t* buffer, uint8_t size);
 
 
 

@@ -164,6 +164,44 @@ void usart_writeStringLength(uint8_t* buffer, uint8_t size)
 
 
 
+
+/////////////////////////////////////
+//Duplicate Functions - For Compatabilty
+void UART_sendString(uint8_t* buffer)
+{
+	uint8_t i = 0;
+
+	while ((buffer[i] != '\0') && (i < 40))
+	{
+		//write out each char in the buffer
+	    while (!(IFG2&UCA0TXIFG));                // USCI_A0 TX buffer ready?
+	    UCA0TXBUF = buffer[i];
+	    i++;
+	}
+
+}
+
+
+/////////////////////////////////////
+//Duplicate Function - Included for compatibilty
+void UART_sendStringLength(uint8_t* buffer, uint8_t size)
+{
+	uint8_t i = 0;
+	for (i = 0 ; i < size ; i++)
+	{
+		//write out each char in the buffer
+	    while (!(IFG2&UCA0TXIFG));                // USCI_A0 TX buffer ready?
+
+	    UCA0TXBUF = buffer[i];
+	}
+
+}
+
+
+
+
+
+
 //////////////////////////////////////
 //ProcessCommand
 //process the incomming data and write out something

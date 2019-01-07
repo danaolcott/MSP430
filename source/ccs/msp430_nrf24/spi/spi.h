@@ -38,20 +38,20 @@ typedef enum
 
 
 
-void spi_init(SPISpeed_t speed);
+void SPI_init(SPISpeed_t speed);
 
 
 
-void spi_select(void);
-void spi_deselect(void);
+void SPI_select(void);
+void SPI_deselect(void);
 
-uint8_t spi_tx(uint8_t data);
-uint8_t spi_rx(void);
+uint8_t SPI_tx(uint8_t data);
+uint8_t SPI_rx(void);
 
 
-void spi_write(uint8_t);
-void spi_writeArray(uint8_t* buffer, uint8_t length);
-uint8_t spi_read(void);
+void SPI_write(uint8_t);
+void SPI_writeArray(uint8_t* buffer, uint8_t length);
+uint8_t SPI_read(void);
 
 
 
