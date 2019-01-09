@@ -593,13 +593,13 @@ uint8_t nrf24_readRxData(uint8_t* data, uint8_t* pipe)
 void nrf24_ISR(void)
 {
     int n = 0x00;
-    uint8_t len = 0x00;
-    uint8_t pipe = 0x00;
-    uint8_t rxBuffer[32] = {0x00};
+    volatile uint8_t len = 0x00;
+    volatile uint8_t pipe = 0x00;
+    volatile uint8_t rxBuffer[32] = {0x00};
     uint8_t status = nrf24_getStatus();
-    uint16_t adcValue, adcLSB, adcMSB = 0x00;
-    uint8_t decimalBuffer[32] = {0x00};
-    uint8_t numChars = 0x00;
+    volatile uint16_t adcValue, adcLSB, adcMSB = 0x00;
+    volatile uint8_t decimalBuffer[32] = {0x00};
+    volatile uint8_t numChars = 0x00;
 
 
     //RX_DR Interrupt - Data Received
