@@ -12,6 +12,7 @@ Utility Functions
 
 
 uint8_t utility_decimal2Buffer(uint16_t value, uint8_t* output);
+uint8_t utility_data2HexBuffer(uint8_t* input, uint8_t len, uint8_t* output);
 
 #endif
 
