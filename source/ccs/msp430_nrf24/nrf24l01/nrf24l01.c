@@ -593,14 +593,12 @@ uint8_t nrf24_readRxData(uint8_t* data, uint8_t* pipe)
 void nrf24_ISR(void)
 {
     int n = 0x00;
-    volatile uint8_t len = 0x00;
-    volatile uint8_t pipe = 0x00;
-    volatile uint8_t rxBuffer[32] = {0x00};
+    uint8_t len = 0x00;
+    uint8_t pipe = 0x00;
+    uint8_t rxBuffer[32] = {0x00};
     uint8_t status = nrf24_getStatus();
-    volatile uint16_t adcValue, adcLSB, adcMSB = 0x00;
-    volatile uint8_t decimalBuffer[32] = {0x00};
-    volatile uint8_t numChars = 0x00;
-
+    uint16_t adcValue, adcLSB, adcMSB = 0x00;
+    uint8_t output[64] = {0x00};
 
     //RX_DR Interrupt - Data Received
     if (status & NRF24_BIT_RX_DR)
@@ -611,25 +609,27 @@ void nrf24_ISR(void)
             len = nrf24_readRxData(rxBuffer, &pipe);            //read the packet and pipe
 
             //output result
-            n = sprintf(decimalBuffer, "RX(%d): ", pipe);
-            UART_sendStringLength(decimalBuffer, n);                   //forward it to the uart
+            n = sprintf(output, "RX(%d): ", pipe);
+            UART_sendStringLength(output, n);                   //forward it to the uart
 
-            UART_sendStringLength(rxBuffer, len);           //forward it to the uart
+            n = utility_data2HexBuffer(rxBuffer, 8, output);
+            UART_sendStringLength(output, n);                   //forward it to the uart
+
             UART_sendString("\r\n");
+
             
             //Testing - 0xFE, MID_ADC_TEMP1, LSB, MSB in millivolts
-            if (rxBuffer[0] == 0xFE)
+            if ((rxBuffer[0] == 0xFE) & (rxBuffer[1] == MID_ADC_TEMP1))
             {
                 adcLSB = (uint16_t)rxBuffer[2];
                 adcMSB = (uint16_t)rxBuffer[3];
                 adcValue = (adcMSB << 8) | (adcLSB & 0xFF);
 
-                //uint8_t utility_decimal2Buffer(uint16_t value, uint8_t* output);
-                numChars = utility_decimal2Buffer(adcValue, decimalBuffer);
+                n = utility_decimal2Buffer(adcValue, output);
 
                 //output the result....
                 UART_sendString("ADC: ");
-                UART_sendStringLength(decimalBuffer, numChars);
+                UART_sendStringLength(output, n);
                 UART_sendString("\r\n");
             }
 
@@ -655,9 +655,9 @@ void nrf24_ISR(void)
     //MX_RT Interrupt - Max Retransmissions - For Ack Only
     else if (status & NRF24_BIT_MAX_RT)
     {
-        UART_sendString("Max Retries Failed...\n");        
-        nrf24_writeReg(NRF24_REG_STATUS, NRF24_BIT_TX_DS | NRF24_BIT_MAX_RT);
-    }    
+		//        UART_sendString("Max Retries Failed...\n");
+		nrf24_writeReg(NRF24_REG_STATUS, NRF24_BIT_TX_DS | NRF24_BIT_MAX_RT);
+    }
 }
 
 
