@@ -12,8 +12,8 @@ Utility Functions
 
 /////////////////////////////////////////////
 //Convert unsigned int value to an array
-//of uint8_t.  Assumes output buffer is 
-//large enough to hold all chars up to max length
+//of uint8_t.  Assumes output buffer is large enough
+//
 uint8_t utility_decimal2Buffer(uint16_t value, uint8_t* output)
 {
     uint8_t temp[16] = {0x00};
@@ -34,10 +34,11 @@ uint8_t utility_decimal2Buffer(uint16_t value, uint8_t* output)
         value = value / 10;
     }
 
+    //reverse it into output buffer and null terminate
     for (i = 0 ; i < index ; i++)
         output[i] = temp[index - i - 1];
 
-    output[i] = 0x00;		//null terminate
+    output[i] = 0x00;
 
     return index;
 }
