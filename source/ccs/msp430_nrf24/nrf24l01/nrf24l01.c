@@ -37,6 +37,15 @@ All pipes are configured to be on
 All pipes are configured with ack off
 
 
+Packets are assumed to be 8 bytes long, start and stop with 0xFE
+Byte Pattern:
+
+Byte 0      0xFE
+Byte 1      Station ID - where / who am I
+Byte 2      Message ID - what am I
+Byte 3 - 6  data 0 - 3
+Byte 7      0xFE
+
 
 */
 
@@ -598,7 +607,9 @@ void nrf24_ISR(void)
     uint8_t rxBuffer[32] = {0x00};
     uint8_t status = nrf24_getStatus();
     uint16_t adcValue, adcLSB, adcMSB = 0x00;
+    uint8_t tempInt, tempFrac = 0x00;
     uint8_t output[64] = {0x00};
+
 
     //RX_DR Interrupt - Data Received
     if (status & NRF24_BIT_RX_DR)
@@ -609,7 +620,7 @@ void nrf24_ISR(void)
             len = nrf24_readRxData(rxBuffer, &pipe);            //read the packet and pipe
 
             //output result
-            n = sprintf(output, "RX(%d): ", pipe);
+            n = sprintf((char*)output, "RX(%d): ", pipe);
             UART_sendStringLength(output, n);                   //forward it to the uart
 
             n = utility_data2HexBuffer(rxBuffer, 8, output);
@@ -619,17 +630,32 @@ void nrf24_ISR(void)
 
             
             //Testing - 0xFE, MID_ADC_TEMP1, LSB, MSB in millivolts
-            if ((rxBuffer[0] == 0xFE) & (rxBuffer[1] == MID_ADC_TEMP1))
+            if (rxBuffer[0] == 0xFE)
             {
-                adcLSB = (uint16_t)rxBuffer[2];
-                adcMSB = (uint16_t)rxBuffer[3];
+
+                //process buffer...
+
+                adcLSB = (uint16_t)rxBuffer[3];
+                adcMSB = (uint16_t)rxBuffer[4];
                 adcValue = (adcMSB << 8) | (adcLSB & 0xFF);
 
-                n = utility_decimal2Buffer(adcValue, output);
+                tempInt = rxBuffer[5];
+                tempFrac = rxBuffer[6];
 
                 //output the result....
                 UART_sendString("ADC: ");
+                n = utility_decimal2Buffer(adcValue, output);
                 UART_sendStringLength(output, n);
+                UART_sendString("\r\n");
+
+                UART_sendString("TEMP: ");
+                n = utility_decimal2Buffer(tempInt, output);
+                UART_sendStringLength(output, n);
+
+                UART_sendString(".");
+                n = utility_decimal2Buffer(tempFrac, output);
+                UART_sendStringLength(output, n);
+
                 UART_sendString("\r\n");
             }
 
