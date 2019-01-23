@@ -22,6 +22,11 @@
  *
  * NOTE:  Need to disable the green led on P1.6
  *
+ * When used as a transmitter, it interfaces with the
+ * BME280 temperature / pressure sensor.  CS Pin - 2.3
+ * SPI pins share with the radio.
+ *
+ *
  * NOTE: There is an error in the usart init function.
  * If you call it after spi init, the spi will not work
  * anymore.
@@ -39,6 +44,7 @@
 #include "spi.h"
 #include "usart.h"
 #include "nrf24l01.h"
+#include "BMP280.h"
 
 void GPIO_init(void);
 void Interrupt_init(void);
@@ -46,31 +52,45 @@ void LED_Red_Toggle(void);
 void LED_Red_On(void);
 void LED_Red_Off(void);
 
+uint8_t outBuffer[64];
+int n = 0x00;
+
 //main program
 int main(void)
 {
 	//disable the watchdog timer
 	WDTCTL = WDTPW + WDTHOLD;
 	
-	GPIO_init();		//leds and buttons
-	Interrupt_init();	//button interrupts
-	usart_init();		//
+	GPIO_init();					//leds and buttons
+	Interrupt_init();				//button and irq pin
+	usart_init();					//9600 baud
 	SPI_init(SPI_SPEED_1MHZ);
 	Timer_init();
-	nrf24_init(NRF24_MODE_RX);
-
-	int counter = 0;
+	nrf24_init(NRF24_MODE_TX);
+	Timer_delay_ms(1000);			//wait a bit
+	BME280_init();					//spi mode - cs pin
 
 	while (1)
 	{
 		LED_Red_Toggle();
 
-		if (!(counter % 10))
-			UART_sendString("Listening...\r\n");
+		uint8_t id = BME280_readChipID();		//reads 0x58 - BMP280 - NOT BME280
+		BME280_Data data = BME280_read();
 
-		Timer_delay_ms(2000);
+		//output results - pressure
+		n = sprintf(outBuffer, "ID: 0x%02x, Press: %d.%d\r\n", id, data.cPressureInt, data.cPressureFrac);
 
-		counter++;
+		usart_writeStringLength(outBuffer, n);
+
+
+
+
+		if (id == 0xFF)
+		{
+			LED_Red_Toggle();
+		}
+
+		Timer_delay_ms(1000);
 	}
 
 	return 0;
@@ -79,18 +99,13 @@ int main(void)
 
 //////////////////////////////////////
 //Configure IO - LEDs and Buttons
-//See encoder, lcd, etc for other io
-//configuration.
-
-//P1.0 - red led, P1.3 user button
-//P2.2 - input -- tx/rx mode.
-//Default is high, enable pullup
-//no interrupt on P2.2, simply polled
-//in the display task
 //
-//Note: I2C conflicts with P1.6, so
-//green led does not work.
-
+//P1.0 - red led - output
+//P1.3 - user button - input, pullup, interrupted
+//P1.4 - IRQ Pin - nrf24l01 - inpullup, interrupted
+//
+//NOTE: P1.6 conflicts with SPIB, so dont use it.
+//
 void GPIO_init(void)
 {
 	//setup bit 0 as output

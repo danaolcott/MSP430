@@ -3,8 +3,8 @@
  *
  *  Created on: Sep 30, 2018
  *      Author: danao
- *
- *  Temp sensor
+ * 
+ *  Temp sensor - Microchip MCP9700A-E/TO
  *
  *  Sensor Transfer Function:
 	Vout = Tc x Ta + V0c    where:
