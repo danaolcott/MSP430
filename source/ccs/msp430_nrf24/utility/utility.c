@@ -44,17 +44,15 @@ uint8_t utility_decimal2Buffer(uint16_t value, uint8_t* output)
 }
 
 
-
 ////////////////////////////////////////////////////////
 //Convert input buffer to equivalent array of hex values
 //len = size of input buffer, returns numbytes in output buffer
-//Assumes output buffer is large enough.  Each hex output in
+//Assumes output buffer is large enough.  Each hex output in 
 //form of "0x## ".
 uint8_t utility_data2HexBuffer(uint8_t* input, uint8_t len, uint8_t* output)
 {
     uint8_t i = 0x00;
     int n = 0x00;
-    uint8_t hexValue[6] = {0x00};
     uint8_t offset = 0x00;          //output buffer offset
 
     for (i = 0 ; i < len ; i++)
@@ -64,6 +62,7 @@ uint8_t utility_data2HexBuffer(uint8_t* input, uint8_t len, uint8_t* output)
     }
 
     output[offset] = 0x00;      //null terminate
+
     return offset;
 }
 

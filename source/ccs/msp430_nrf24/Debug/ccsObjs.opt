@@ -1,1 +1,1 @@
-"./main.obj" "./usart/usart.obj" "./timer/timer.obj" "./spi/spi.obj" "./sensors/BMP280.obj" "./nrf24l01/nrf24l01.obj" "./nrf24l01/utility.obj" "../lnk_msp430g2553.cmd" -l"libc.a" 
+"./main.obj" "./utility/utility.obj" "./usart/usart.obj" "./timer/timer.obj" "./spi/spi.obj" "./sensors/BMP280.obj" "./nrf24l01/nrf24l01.obj" "../lnk_msp430g2553.cmd" -l"libc.a" 

@@ -45,6 +45,7 @@
 #include "usart.h"
 #include "nrf24l01.h"
 #include "BMP280.h"
+#include "utility.h"
 
 void GPIO_init(void);
 void Interrupt_init(void);
@@ -52,8 +53,9 @@ void LED_Red_Toggle(void);
 void LED_Red_On(void);
 void LED_Red_Off(void);
 
-uint8_t outBuffer[64];
+uint8_t outBuffer[100];
 int n = 0x00;
+uint8_t rxBuffer[64];
 
 //main program
 int main(void)
@@ -68,29 +70,41 @@ int main(void)
 	Timer_init();
 	nrf24_init(NRF24_MODE_TX);
 	Timer_delay_ms(1000);			//wait a bit
-	BME280_init();					//spi mode - cs pin
+	BMP280_init();					//spi mode - cs pin
+	Timer_delay_ms(1000);			//wait a bit
+	BMP280_wakeup();
+	Timer_delay_ms(1000);			//wait a bit
 
 	while (1)
 	{
 		LED_Red_Toggle();
 
-		uint8_t id = BME280_readChipID();		//reads 0x58 - BMP280 - NOT BME280
-		BME280_Data data = BME280_read();
+		uint8_t id = BMP280_readChipID();		//reads 0x58 - BMP280 - NOT BME280
+		BMP280_Data data = BMP280_read();
+
+		int cPressKPAInt = data.cPressureInt / 1000;
+		int cPressKPAFrac = data.cPressureInt % 1000;
+
 
 		//output results - pressure
-		n = sprintf(outBuffer, "ID: 0x%02x, Press: %d.%d\r\n", id, data.cPressureInt, data.cPressureFrac);
-
+		n = sprintf((char*)outBuffer, "ID: 0x%02x, Temp: %d.%d\r\n", id, data.cTemperatureFInt, data.cTemperatureFFrac);
 		usart_writeStringLength(outBuffer, n);
 
+		n = sprintf((char*)outBuffer, "Pressure: %d.%d\r\n", cPressKPAInt, cPressKPAFrac);
+				usart_writeStringLength(outBuffer, n);
+
+		//read raw registers - 6 bytes starting at 0xF7
+		BMP280_readRegArray(0xF3, rxBuffer, 10);
+
+		//print the result into outbuffer
+		n = utility_data2HexBuffer(rxBuffer, 10, outBuffer);
+		usart_writeString("\r\nResults - Raw: ");
+		usart_writeStringLength(outBuffer, n);
+		usart_writeString("\r\n");
 
 
 
-		if (id == 0xFF)
-		{
-			LED_Red_Toggle();
-		}
-
-		Timer_delay_ms(1000);
+		Timer_delay_ms(4000);
 	}
 
 	return 0;
