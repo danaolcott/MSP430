@@ -30,10 +30,10 @@ UCA0MCTL = UCBRS2 + UCBRS1;     //bits 2 and 1 = 6
 
 //UART variables
 #define RX_BUFFER_SIZE	32
-static uint8_t rxIndex = 0;
-static uint8_t rxActiveBuffer = 1;
-uint8_t rxBuffer1[RX_BUFFER_SIZE];		//read buffer for UART
-uint8_t rxBuffer2[RX_BUFFER_SIZE];		//read buffer for UART
+static volatile uint8_t rxIndex = 0;
+static volatile uint8_t rxActiveBuffer = 1;
+volatile uint8_t rxBuffer1[RX_BUFFER_SIZE];		//read buffer for UART
+volatile uint8_t rxBuffer2[RX_BUFFER_SIZE];		//read buffer for UART
 
 
 
@@ -70,15 +70,11 @@ void usart_init(void)
 	memset(rxBuffer2, 0x00, RX_BUFFER_SIZE);
 
 	//configure special function for 1.1 and 1.2
-	//using the P1SEL register
 	P1SEL = BIT1 | BIT2;
 	P1SEL2 = BIT1 | BIT2;
 
-	//put the UART in reset for configuration
-	UCA0CTL1 |= UCSWRST;
-
-	//configure the serial IO
-	UCA0CTL1 |= UCSSEL_2;		//use SMCLK
+	UCA0CTL1 |= UCSWRST;			//put UART into reset config
+	UCA0CTL1 |= UCSSEL_2;		//config serial IO - use SMCLK
 
     //configure the bit rate - Table 15-4
     //for 16mhz clock and 9600 baud:
@@ -87,41 +83,19 @@ void usart_init(void)
     UCA0BR1 = (1666 >> 8) & 0xFF;
     UCA0MCTL = UCBRS2 + UCBRS1;     //bits 2 and 1 = 6
 
-
-/*
-#ifdef CLK16_BAUD230000
-	//230400 baud and 16mhz
-	UCA0BR0 = (uint8_t)833;
-	UCA0BR1 = 0;
-	UCA0MCTL = UCBRS2 + UCBRS1 + UCBRS0;			//modulation UCBRSx = 7
-#else
-	//9600 baud and 1 mhz clock
-	UCA0BR0 = 104;				//low bits 1 mhz clock and 9600 baud
-	UCA0BR1 = 0;				//high bits 1 mhz clock and 9600 baud
-	UCA0MCTL = UCBRS0;			//modulation UCBRSx = 1
-#endif
-
-*/
-
-
-	//take it out of reset mode
-	UCA0CTL1 &=~ UCSWRST;
-
-	//enable the USCI_A0 Rx interrupt.  Controlled when
-    //processing a command
-	IE2 |= UCA0RXIE;
+	UCA0CTL1 &=~ UCSWRST;			//take it out of reset mode
+	IE2 |= UCA0RXIE;				//enable rx interrupts
 }
 
 
 
 /////////////////////////////////////////
+//write one byte over the usart
 void usart_writeByte(uint8_t value)
 {
-	//write out each char in the buffer
     while (!(IFG2&UCA0TXIFG));                // USCI_A0 TX buffer ready?
     UCA0TXBUF = value;
     while (!(IFG2&UCA0TXIFG));                // USCI_A0 TX buffer ready?
-
 }
 
 
@@ -140,7 +114,6 @@ void usart_writeString(uint8_t* buffer)
 	    UCA0TXBUF = buffer[i];
 	    i++;
 	}
-
 }
 
 
@@ -154,12 +127,9 @@ void usart_writeStringLength(uint8_t* buffer, uint8_t size)
 	uint8_t i = 0;
 	for (i = 0 ; i < size ; i++)
 	{
-		//write out each char in the buffer
-	    while (!(IFG2&UCA0TXIFG));                // USCI_A0 TX buffer ready?
-
-	    UCA0TXBUF = buffer[i];
+	    while (!(IFG2&UCA0TXIFG));		// USCI_A0 TX buffer ready?
+	    UCA0TXBUF = buffer[i];			//put into tx register
 	}
-
 }
 
 
@@ -198,14 +168,9 @@ void UART_sendStringLength(uint8_t* buffer, uint8_t size)
 }
 
 
-
-
-
-
 //////////////////////////////////////
 //ProcessCommand
-//process the incomming data and write out something
-//use string compare functiosn with buffer
+//For now, echo the data
 void usart_processCommand(uint8_t* buffer, uint8_t len)
 {
 	//temporarily disable the rx interrupts
@@ -217,7 +182,6 @@ void usart_processCommand(uint8_t* buffer, uint8_t len)
 
 	//reenable the rx interrupts
 	IE2 |= UCA0RXIE;
-
 }
 
 
@@ -233,7 +197,7 @@ void usart_processCommand(uint8_t* buffer, uint8_t len)
 #pragma vector=USCIAB0RX_VECTOR
 __interrupt void USCI0RX_ISR(void)
 {
-    while (!(IFG2&UCA0TXIFG));                // USCI_A0 TX buffer ready?
+    while (!(IFG2&UCA0TXIFG));      // USCI_A0 TX buffer ready?
 
     char t = UCA0RXBUF;				//read the char to clear the flag
 
@@ -258,8 +222,8 @@ __interrupt void USCI0RX_ISR(void)
             if (rxActiveBuffer == 1)
             {
             	rxBuffer1[rxIndex] = 0x00;	//terminate
-            	memset(rxBuffer2, 0x00, RX_BUFFER_SIZE);
-            	usart_processCommand(rxBuffer1, rxIndex);
+            	memset((uint8_t*)rxBuffer2, 0x00, RX_BUFFER_SIZE);
+            	usart_processCommand((uint8_t*)rxBuffer1, rxIndex);
             	rxActiveBuffer = 2;
             	rxIndex = 0x00;
             }
@@ -267,8 +231,8 @@ __interrupt void USCI0RX_ISR(void)
             else
             {
             	rxBuffer2[rxIndex] = 0x00;	//terminate
-            	memset(rxBuffer1, 0x00, RX_BUFFER_SIZE);
-            	usart_processCommand(rxBuffer2, rxIndex);
+            	memset((uint8_t*)rxBuffer1, 0x00, RX_BUFFER_SIZE);
+            	usart_processCommand((uint8_t*)rxBuffer2, rxIndex);
             	rxActiveBuffer = 1;
             	rxIndex = 0x00;
             }
@@ -280,8 +244,8 @@ __interrupt void USCI0RX_ISR(void)
     	//buffer is full - reset the counter and clear the buffer
     	rxIndex = 0x00;
     	rxActiveBuffer = 1;
-    	memset(rxBuffer1, 0x00, RX_BUFFER_SIZE);
-    	memset(rxBuffer2, 0x00, RX_BUFFER_SIZE);
+    	memset((uint8_t*)rxBuffer1, 0x00, RX_BUFFER_SIZE);
+    	memset((uint8_t*)rxBuffer2, 0x00, RX_BUFFER_SIZE);
     }
 }
 

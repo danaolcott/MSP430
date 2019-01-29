@@ -55,17 +55,11 @@
 
 typedef struct
 {
-	uint32_t uPressure;
-	uint32_t uTemperature;
-
-	int32_t cTemperatureCInt;
-	int32_t cTemperatureCFrac;
-	int32_t cTemperatureFInt;
-	int32_t cTemperatureFFrac;
-
-	uint32_t cPressureInt;
-	uint32_t cPressureFrac;
-
+	int16_t cTemperatureCInt;
+	int16_t cTemperatureCFrac;
+	int16_t cTemperatureFInt;
+	int16_t cTemperatureFFrac;
+	uint32_t cPressure;				//pa
 }BMP280_Data;
 
 
@@ -95,6 +89,8 @@ BMP280_Data BMP280_read(void);
 void BMP280_readRegArray(uint8_t startAddress, uint8_t* buffer, uint8_t len);
 void BMP280_sleep(void);
 void BMP280_wakeup(void);
+uint8_t BMP280_getStatus(void);
+
 
 
 BMP280_S32_t BMP280_compensate_T_int32(BMP280_S32_t adc_T);

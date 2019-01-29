@@ -46,6 +46,11 @@ Byte 2      Message ID - what am I
 Byte 3 - 6  data 0 - 3
 Byte 7      0xFE
 
+Examples:
+Temp sensor - data lsb, data msb, temp int, temp frac
+
+BMP280 - since it's all 32bit data, send the raw data - bytes 0 - 3
+
 
 */
 
@@ -421,6 +426,7 @@ void nrf24_writeTXPayLoad(uint8_t* buffer, uint8_t length)
 //
 void nrf24_transmitData(uint8_t pipe, uint8_t* buffer, uint8_t length)
 {
+	uint8_t outputBuffer[64] = {0x00};
     uint16_t timeout = NRF24_TX_TIMEOUT;    //reset the counter    
     mTransmitCompleteFlag = 0;              //clear the tx complete flag
 
@@ -450,8 +456,9 @@ void nrf24_transmitData(uint8_t pipe, uint8_t* buffer, uint8_t length)
     
     else if(mTransmitCompleteFlag == 1)
     {
+    	int n = utility_data2HexBuffer(buffer, 8, outputBuffer);
         UART_sendString("Polling - Transmit Complete: ");
-        UART_sendStringLength(buffer, length);
+        UART_sendStringLength(outputBuffer, n);
         UART_sendString("\r\n");        
     }
     
@@ -628,7 +635,8 @@ void nrf24_ISR(void)
 
             UART_sendString("\r\n");
 
-            
+
+            //0xFE, where am i, what am i, raw LSB, raw MSB, procINT, procFRAC, 0xFE
             //Testing - 0xFE, MID_ADC_TEMP1, LSB, MSB in millivolts
             if (rxBuffer[0] == 0xFE)
             {

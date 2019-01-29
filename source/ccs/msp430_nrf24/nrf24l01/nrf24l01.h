@@ -68,10 +68,6 @@ Dana Olcott
 
 
 
-
-
-
-
 ///////////////////////////////////////////////
 //Register Definitions - Registers
 #define NRF24_REG_CONFIG              0x00
@@ -121,7 +117,8 @@ typedef enum
 //Station - Locations
 typedef enum
 {
-    STATION_1 = 0x00
+    STATION_1 = 0x00,
+	STATION_2 = 0x01
 }NRF24_Station_t;
 
 
@@ -132,7 +129,9 @@ typedef enum
 //sensor inputs, locations, etc.
 typedef enum
 {
-    MID_TEMP_MCP9700A = 0x00      //Millivolts read by temp sensor
+    MID_TEMP_MCP9700A = 0x00,      //Millivolts read by temp sensor
+	MID_PRESS_BMP280 = 0x01,
+	MID_TEMP_BMP280 = 0x02
 }NRF24_MID_t;
 
 

@@ -53,9 +53,10 @@ void LED_Red_Toggle(void);
 void LED_Red_On(void);
 void LED_Red_Off(void);
 
-uint8_t outBuffer[100];
+uint8_t outBuffer[64];
 int n = 0x00;
-uint8_t rxBuffer[64];
+uint8_t rxBuffer[16];
+uint8_t txBuffer[8] = {0x00};
 
 //main program
 int main(void)
@@ -79,32 +80,35 @@ int main(void)
 	{
 		LED_Red_Toggle();
 
+
 		uint8_t id = BMP280_readChipID();		//reads 0x58 - BMP280 - NOT BME280
 		BMP280_Data data = BMP280_read();
 
-		int cPressKPAInt = data.cPressureInt / 1000;
-		int cPressKPAFrac = data.cPressureInt % 1000;
+		int cPressKPAInt = data.cPressure / 1000;
+		int cPressKPAFrac = data.cPressure % 1000;
 
-
-		//output results - pressure
-		n = sprintf((char*)outBuffer, "ID: 0x%02x, Temp: %d.%d\r\n", id, data.cTemperatureFInt, data.cTemperatureFFrac);
+		n = sprintf((char*)outBuffer, "ID: 0x%02x, Temp: %d.%d\r\n", id, (int)data.cTemperatureFInt, (int)data.cTemperatureFFrac);
 		usart_writeStringLength(outBuffer, n);
 
 		n = sprintf((char*)outBuffer, "Pressure: %d.%d\r\n", cPressKPAInt, cPressKPAFrac);
-				usart_writeStringLength(outBuffer, n);
-
-		//read raw registers - 6 bytes starting at 0xF7
-		BMP280_readRegArray(0xF3, rxBuffer, 10);
-
-		//print the result into outbuffer
-		n = utility_data2HexBuffer(rxBuffer, 10, outBuffer);
-		usart_writeString("\r\nResults - Raw: ");
 		usart_writeStringLength(outBuffer, n);
-		usart_writeString("\r\n");
 
 
+		//transmit the data over the radio
+		//pressure
+		txBuffer[0] = 0xFE;
+		txBuffer[1] = STATION_2;
+		txBuffer[2] = MID_PRESS_BMP280;
+		txBuffer[3] = (uint8_t)(data.cPressure & 0xFF);
+		txBuffer[4] = (uint8_t)((data.cPressure >> 8) & 0xFF);
+		txBuffer[5] = (uint8_t)((data.cPressure >> 16) & 0xFF);
+		txBuffer[6] = (uint8_t)((data.cPressure >> 24) & 0xFF);
+		txBuffer[7] = 0xFE;
 
-		Timer_delay_ms(4000);
+		//send the data
+		nrf24_transmitData(0, txBuffer, 8);
+
+		Timer_delay_ms(1000);
 	}
 
 	return 0;
@@ -128,9 +132,9 @@ void GPIO_init(void)
 
 	//set up the user button bit 3
 	//as input with pull up enabled
-	P1DIR &=~ BIT3;		//input
-	P1REN |= BIT3;		//enable pullup/down
-	P1OUT |= BIT3;		//resistor set to pull up
+//	P1DIR &=~ BIT3;		//input
+//	P1REN |= BIT3;		//enable pullup/down
+//	P1OUT |= BIT3;		//resistor set to pull up
 
 	//configure 1.4 as input with pullup
 	P1DIR &=~ BIT4;		//input
@@ -147,8 +151,8 @@ void Interrupt_init(void)
 	//enable all the interrupts
 	__bis_SR_register(GIE);
 
-	P1IE |= BIT3;		//enable button interrupt
-	P1IFG &=~ BIT3;		//clear the flag
+//	P1IE |= BIT3;		//enable button interrupt
+//	P1IFG &=~ BIT3;		//clear the flag
 
 	P1IE |= BIT4;		//enable button interrupt
 	P1IFG &=~ BIT4;		//clear the flag
@@ -182,6 +186,7 @@ __interrupt void Port_1(void)
 {
 	//Get the interrupt flag....
 	//User button
+	/*
 	if (P1IFG & BIT3)
 	{
 		//clear the interrupt flag - button
@@ -189,8 +194,9 @@ __interrupt void Port_1(void)
 
 		P1IFG &=~ BIT3;
 	}
+*/
 
-	else if (P1IFG & BIT4)
+	if (P1IFG & BIT4)
 	{
 		nrf24_ISR();
 

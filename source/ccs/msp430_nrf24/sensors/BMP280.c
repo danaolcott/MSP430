@@ -41,9 +41,9 @@ static void BMP280_deselect(void);
 
 
 //////////////////////////////////////////////////////////
-static volatile BMP280_CalibrationData mCalibrationData;
+BMP280_CalibrationData mCalibrationData;
 
-BMP280_S32_t t_fine;		//used in the temperature, pressure, humidity correction functions
+static volatile BMP280_S32_t t_fine = 0x00;		//used in the temperature, pressure, humidity correction functions
 
 //////////////////////////////////////////////////////////
 //Configure for reading pressure, humidity, temp, I2C
@@ -85,6 +85,10 @@ void BMP280_init(void)
 	//result - 0001 0000 = 0x10
 	BMP280_writeReg(BMP280_REG_CONFIG, 0x10);
 
+	//try standby 125ms - 010  100 00
+//	BMP280_writeReg(BMP280_REG_CONFIG, 0x50);
+
+
 	//wakeup - bits 0 and 1 high for reg BMP280_REG_CTRL_MEAS
 	BMP280_writeReg(BMP280_REG_CTRL_MEAS, 0x57);
 
@@ -124,6 +128,7 @@ BMP280_Data BMP280_read(void)
 
 	BMP280_Data result;
 
+	//read the data
 	BMP280_readRegArray(BMP280_REG_PRESS_MSB, data, 6);
 
 	//Pressure - 20bits
@@ -138,8 +143,8 @@ BMP280_Data BMP280_read(void)
 	xlsb = ((uint32_t)(data[5] >> 4)) & 0x0F;
 	uTemperature = ((msb << 12) | (lsb << 4) | (xlsb));
 
-	result.uPressure = uPressure;
-	result.uTemperature = uTemperature;
+//	result.uPressure = uPressure;
+//	result.uTemperature = uTemperature;
 
 	//compute the corrected values using the raw data
 	//and calibration values as described in the datasheet
@@ -149,17 +154,16 @@ BMP280_Data BMP280_read(void)
 	BMP280_U32_t cPressure = BMP280_compensate_P_int64((BMP280_S32_t)uPressure);		//divide 256 for integer
 
 	//integer and fractional - celcius
-	result.cTemperatureCInt = cTemperature / 100;
-	result.cTemperatureCFrac = cTemperature % 100;
+	result.cTemperatureCInt = (uint16_t)(cTemperature / 100);
+	result.cTemperatureCFrac = (uint16_t)(cTemperature % 100);
 
 	BMP280_S32_t cTemperatureF = cTemperature * 9 / 5;
 	cTemperatureF += 3200;
 
-	result.cTemperatureFInt = cTemperatureF / 100;
-	result.cTemperatureFFrac = cTemperatureF % 100;
+	result.cTemperatureFInt = (uint16_t)(cTemperatureF / 100);
+	result.cTemperatureFFrac = (uint16_t)(cTemperatureF % 100);
 
-	result.cPressureInt = cPressure / 256;
-	result.cPressureFrac = cPressure % 256;
+	result.cPressure = cPressure / 256;				//pressure in pa
 
 	//...................
 
@@ -189,6 +193,13 @@ void BMP280_wakeup(void)
 	BMP280_writeReg(BMP280_REG_CTRL_MEAS, value);
 }
 
+/////////////////////////////////////////////
+//Read status register and return result
+uint8_t BMP280_getStatus(void)
+{
+	uint8_t result = BMP280_readReg(BMP280_REG_STATUS);
+	return result;
+}
 
 
 
@@ -306,11 +317,6 @@ void BMP280_readCalibrationValues(void)
 	mCalibrationData.dig_P9 = ((int16_t)reg[22]) + (((int16_t)reg[23]) * 256);
 
 }
-
-
-
-
-
 
 
 
