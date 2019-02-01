@@ -426,7 +426,7 @@ void nrf24_writeTXPayLoad(uint8_t* buffer, uint8_t length)
 //
 void nrf24_transmitData(uint8_t pipe, uint8_t* buffer, uint8_t length)
 {
-	uint8_t outputBuffer[64] = {0x00};
+//	uint8_t outputBuffer[64] = {0x00};
     uint16_t timeout = NRF24_TX_TIMEOUT;    //reset the counter    
     mTransmitCompleteFlag = 0;              //clear the tx complete flag
 
@@ -448,7 +448,8 @@ void nrf24_transmitData(uint8_t pipe, uint8_t* buffer, uint8_t length)
     //if timeout == 0 or transmit complete flag
     if ((!timeout) || (!mTransmitCompleteFlag))
     {
-        UART_sendString("Timeout - Counter Expired - Transmit Aborted\r\n");
+    	P1OUT |= BIT0;						//set the red led on
+//        UART_sendString("Timeout - Counter Expired - Transmit Aborted\r\n");
         mTransmitCompleteFlag = 0x00;
         nrf24_flushTx();
         nrf24_writeReg(NRF24_REG_STATUS, NRF24_BIT_TX_DS | NRF24_BIT_MAX_RT);
@@ -456,15 +457,17 @@ void nrf24_transmitData(uint8_t pipe, uint8_t* buffer, uint8_t length)
     
     else if(mTransmitCompleteFlag == 1)
     {
-    	int n = utility_data2HexBuffer(buffer, 8, outputBuffer);
-        UART_sendString("Polling - Transmit Complete: ");
-        UART_sendStringLength(outputBuffer, n);
-        UART_sendString("\r\n");        
+    	P1OUT &=~ BIT0;						//led off
+//    	int n = utility_data2HexBuffer(buffer, 8, outputBuffer);
+//        UART_sendString("Polling - Transmit Complete: ");
+//        UART_sendStringLength(outputBuffer, n);
+//        UART_sendString("\r\n");
     }
     
     else
     {
-        UART_sendString("Polling - Transmit Flag Never Set - Timeout\r\n");    
+    	P1OUT |= BIT0;						//set the red led on
+//        UART_sendString("Polling - Transmit Flag Never Set - Timeout\r\n");
     }
     
     /////////////////////////////////////////
@@ -472,7 +475,7 @@ void nrf24_transmitData(uint8_t pipe, uint8_t* buffer, uint8_t length)
     if (nrf24_getStatus() & (NRF24_BIT_TX_DS | NRF24_BIT_TX_DS ))
     {
         //tx ds bit high - clearing it
-        UART_sendString("TX_DS and or MAX_RT Bit(s) High - Clearing It...\r\n");
+//        UART_sendString("TX_DS and or MAX_RT Bit(s) High - Clearing It...\r\n");
         nrf24_writeReg(NRF24_REG_STATUS, NRF24_BIT_TX_DS | NRF24_BIT_MAX_RT);
     }   
 }

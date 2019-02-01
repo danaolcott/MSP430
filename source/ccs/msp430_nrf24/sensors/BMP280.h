@@ -55,10 +55,10 @@
 
 typedef struct
 {
-	int16_t cTemperatureCInt;
-	int16_t cTemperatureCFrac;
-	int16_t cTemperatureFInt;
-	int16_t cTemperatureFFrac;
+	int8_t cTemperatureCInt;
+	int8_t cTemperatureCFrac;
+	int8_t cTemperatureFInt;
+	int8_t cTemperatureFFrac;
 	uint32_t cPressure;				//pa
 }BMP280_Data;
 
