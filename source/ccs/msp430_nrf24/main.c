@@ -112,7 +112,7 @@ int main(void)
 
 		//transmit pressure
 		txBuffer[0] = 0xFE;
-		txBuffer[1] = STATION_2;
+		txBuffer[1] = STATION_1;
 		txBuffer[2] = MID_PRESS_BMP280;
 		txBuffer[3] = (uint8_t)(data.cPressure & 0xFF);
 		txBuffer[4] = (uint8_t)((data.cPressure >> 8) & 0xFF);
@@ -131,7 +131,7 @@ int main(void)
 
 		//transmit temperature
 		txBuffer[0] = 0xFE;
-		txBuffer[1] = STATION_2;
+		txBuffer[1] = STATION_1;
 		txBuffer[2] = MID_TEMP_BMP280;
 		txBuffer[3] = data.cTemperatureFInt;
 		txBuffer[4] = data.cTemperatureFFrac;
@@ -197,8 +197,6 @@ void Interrupt_init(void)
 
 	P1IE |= BIT4;		//enable button interrupt
 	P1IFG &=~ BIT4;		//clear the flag
-
-
 }
 
 ///////////////////////////////////////////
@@ -248,14 +246,12 @@ __interrupt void Port_1(void)
 	{
 		//clear the interrupt flag - button
 		LED_Red_Toggle();
-
 		P1IFG &=~ BIT3;
 	}
 
 	if (P1IFG & BIT4)
 	{
 		nrf24_ISR();
-
 		P1IFG &=~ BIT4;
 	}
 

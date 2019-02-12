@@ -117,8 +117,9 @@ typedef enum
 //Station - Locations
 typedef enum
 {
-    STATION_1 = 0x00,
-	STATION_2 = 0x01
+    STATION_0 = 0x00,           //stm8 Backhouse
+    STATION_1 = 0x01,           //msp430 - red board, 9v
+    STATION_REPEATER_1 = 2      //repeater on arduino
 }NRF24_Station_t;
 
 
@@ -130,8 +131,11 @@ typedef enum
 typedef enum
 {
     MID_TEMP_MCP9700A = 0x00,      //Millivolts read by temp sensor
-	MID_PRESS_BMP280 = 0x01,
-	MID_TEMP_BMP280 = 0x02
+    MID_PRESS_BME280 = 0x01,        //BME280 - Pressure Pa
+    MID_TEMP_BME280 = 0x02,         //BME280 - Temp F/C (int/frac)
+    MID_HUM_BME280 = 0x03,          //BME280 - Humidity
+    MID_PRESS_BMP280 = 0x04,        //BMP280 - Pressure Pa
+    MID_TEMP_BMP280 = 0x05,         //BMP280 - Temp F/C (int/frac)
 }NRF24_MID_t;
 
 
@@ -142,7 +146,8 @@ typedef enum
 //Byte 0        0xFE
 //Byte 1        NRF24_Station_t     where is it
 //Byte 2        NRF24_MID_t         what is it
-//Bytes 3 - 7   Data Bytes
+//Bytes 3 - 6   Data Bytes		4 data bytes
+//Byte 7		0xFE
 //
 
 ////////////////////////////////////////////////
