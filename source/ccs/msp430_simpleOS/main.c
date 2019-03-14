@@ -269,114 +269,53 @@ SimpleOS_start(void)
 
 
 
-/*
- *
- *
- *
- *
-void __attribute__((naked))
-SimpleOS_start(void)
-{
-    __asm("MOV  &RunPt, R4\n");
-
-    //This reuslts in the SP looking at the task SP.  Future pops from here
-    //will pop values from the task SP into various target registers.
-    __asm("MOV  @R4, SP\n");
-
-    __asm("POP R6\n");              //stack - 16
-    __asm("POP R7\n");              //stack - 15
-    __asm("POP R8\n");              //stack - 14
-    __asm("POP R9\n");
-    __asm("POP R10\n");
-    __asm("POP R11\n");
-    __asm("POP R12\n");
-    __asm("POP R13\n");
-    __asm("POP R14\n");             //stack - 8
-
-
-    //we want to move the SP to spot that contains the function
-    //pointer, then pop that into the ....... R3???
-    //let's use R15
-    //move to the address of the function pointer..
-    //
-    __asm("MOV  SP, R15\n");       //move the address, not the contents
-    __asm("INC R15\n");         //increment till you get to the top - 1
-    __asm("INC R15\n");
-    __asm("INC R15\n");
-    __asm("INC R15\n");                 //0xC180 - just before 0x0202
-    __asm("MOV R15, SP\n");            //setup the SP to pop next address into function to run
-
-    //enable all the interrupts
-//    __bis_SR_register(GIE);
-
-    __asm("RET\n");
-}
-
- *
- *
- */
-
-
-///////////////////////////////////////////////////////
-//Systick_Handler
-//
-/*
-void __attribute__((naked))
-SysTick_Handler(void)
-{
-    __asm(  "CPSID   I\n"
-            "PUSH    {R4-R11}\n"
-            "LDR     R0, =RunPt\n"
-            "LDR     R1, [R0]\n"
-            "STR     SP, [R1]\n"
-            "PUSH    {R0, LR}\n"
-            "BL      SimpleOS_scheduler\n"
-            "POP     {R0, LR}\n"
-            "LDR     R1, [R0]\n"
-            "LDR     SP, [R1]\n"
-            "POP     {R4-R11}\n"
-            "CPSIE   I\n"
-            "BX      LR\n");
-}
-*/
-
-
-
 //interrupt routine for using GNU compiler
 __attribute__((interrupt(TIMER0_A0_VECTOR))) void Timer_A(void)
 {
     //clear the timer interrupt
     TACTL &=~ BIT0;
 
-    __asm("PUSH    R6\n");      //puts R6 into contents looked at by the SP
-    __asm("PUSH    R7\n");
-    __asm("PUSH    R8\n");
-    __asm("PUSH    R9\n");
-    __asm("PUSH    R10\n");
-    __asm("PUSH    R11\n");
 
-    __asm("MOV     &RunPt, R4\n");      //move address of RunPt into R4
-    __asm("MOV     @R4, R5\n");         //move contents of R4 into R5
-    __asm("MOV     @R5, SP\n");         //move contents in R5 into SP
+    //disable all the interrupts
+    __bic_SR_register(GIE);
 
-    __asm("PUSH    R4\n");              //save R4
-    __asm("PUSH    SR\n");              //save SR
+    __asm("PUSH R5\n");              //stack - 16
+    __asm("PUSH R6\n");              //stack - 15
+    __asm("PUSH R7\n");              //stack - 14
+    __asm("PUSH R8\n");              //stack - 13
+    __asm("PUSH R9\n");
+    __asm("PUSH R10\n");
+    __asm("PUSH R11\n");
+    __asm("PUSH R12\n");
+    __asm("PUSH R13\n");
+    __asm("PUSH R14\n");             //stack - 7
+
+    __asm("MOV  &RunPt, R4\n");
+
+    //This reuslts in the SP looking at the task SP.  Future pops from here
+    //will pop values from the task SP into various target registers.
+    __asm("MOV  @R4, SP\n");
 
     __asm("CALL     #SimpleOS_scheduler\n");     //call the scheduler
 
-    __asm("POP    SR\n");               //restore SR
-    __asm("POP    R4\n");               //restore R4
+    __asm("MOV  @R4, SP\n");
 
-    __asm("MOV     @R4, R5\n");         //move the contents in R4 into R5
-    __asm("MOV     @R5, SP\n");         //move the contents in R5 into the stack pointer
 
-    __asm("POP    R6\n");           //pop
-    __asm("POP    R7\n");
-    __asm("POP    R8\n");
-    __asm("POP    R9\n");
-    __asm("POP    R10\n");
-    __asm("POP    R11\n");
+    __asm("POP R5\n");              //stack - 16
+    __asm("POP R6\n");              //stack - 15
+    __asm("POP R7\n");              //stack - 14
+    __asm("POP R8\n");              //stack - 13
+    __asm("POP R9\n");
+    __asm("POP R10\n");
+    __asm("POP R11\n");
+    __asm("POP R12\n");
+    __asm("POP R13\n");
+    __asm("POP R14\n");             //stack - 7
 
+    //enable all the interrupts
+    __bis_SR_register(GIE);
+
+    __asm("RET\n");
 }
 
 
