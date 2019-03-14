@@ -23,12 +23,23 @@ void TimerA_init(void);
 void LED_RED_TOGGLE(void);
 void LED_GREEN_TOGGLE(void);
 
+void TaskFunction1(void);
+void TaskFunction2(void);
 
 
+
+
+//////////////////////////////////////////
+//Task Control Block
+//Defines each task.  SP - stack pointer.
+//SP has to be first.  When initializing and
+//in the timer isr, it uses the first element to
+//manage the task stacks.
+//
 struct taskBlock
 {
+    int16_t* sp;                        //SP has to be first!!!
     struct taskBlock* next;
-    int16_t* sp;
     int16_t stack[STACK_SIZE];
 };
 
@@ -63,7 +74,7 @@ int main(void)
 
     //os related calls
     SimpleOS_init();
-    SimpleOS_addThreads(LED_RED_TOGGLE, LED_GREEN_TOGGLE);
+    SimpleOS_addThreads(TaskFunction1, TaskFunction2);
     SimpleOS_launch();
 
     //while loop - should never make it here
@@ -153,23 +164,27 @@ void SimpleOS_scheduler(void)
 //i is the index in the Task list
 void SimpleOS_initStack(uint8_t i)
 {
+    /////////////////////////////////////////////////
     //PC  - stack_size - 1
-    Task[i].sp = &Task[i].stack[STACK_SIZE - 2]; //SP
+    Task[i].stack[STACK_SIZE-1] = 0x1010;   // R0 - PC
+    Task[i].stack[STACK_SIZE-2] = 0x0101;   // R1 - SP - contents at the address hold the next instruction - shows up in the PC register
+    Task[i].stack[STACK_SIZE-3] = 0x0202;   // R2 - SR
+    Task[i].stack[STACK_SIZE-4] = 0x0303;   // R3 - leave this alone!!! - dont pop anything into this
+    Task[i].stack[STACK_SIZE-5] = 0x0F0F;   // R15 - this is the last pop - 0x0F0F into R15
+    Task[i].stack[STACK_SIZE-6] = 0x0F0F;   // R15
+    Task[i].stack[STACK_SIZE-7] = 0x0E0E;   // R14
+    Task[i].stack[STACK_SIZE-8] = 0x0D0D;   // R13
+    Task[i].stack[STACK_SIZE-9] = 0x0C0C;   // R12
+    Task[i].stack[STACK_SIZE-10] = 0x0B0B;  // R11
+    Task[i].stack[STACK_SIZE-11] = 0x0A0A;  // R10
+    Task[i].stack[STACK_SIZE-12] = 0x0909;  // R9
+    Task[i].stack[STACK_SIZE-13] = 0x0808;  // R8
+    Task[i].stack[STACK_SIZE-14] = 0x0707;  // R7 - this is the second pop
+    Task[i].stack[STACK_SIZE-15] = 0x0606;  // R6 - After setting the SP, 0404 is the first pop
+    Task[i].stack[STACK_SIZE-16] = 0x0505;  // R5 - After setting the SP, 0404 is the first pop
 
-    Task[i].stack[STACK_SIZE-3] = 0x1414;   // R2 - SR
-    Task[i].stack[STACK_SIZE-4] = 0x1212;   // R3
-    Task[i].stack[STACK_SIZE-5] = 0x0303;   // R4
-    Task[i].stack[STACK_SIZE-6] = 0x0202;   // R5
-    Task[i].stack[STACK_SIZE-7] = 0x0101;   // R6
-    Task[i].stack[STACK_SIZE-8] = 0x0000;   // R7
-    Task[i].stack[STACK_SIZE-9] = 0x1111;   // R8
-    Task[i].stack[STACK_SIZE-10] = 0x1010;  // R9
-    Task[i].stack[STACK_SIZE-11] = 0x0909;  // R10
-    Task[i].stack[STACK_SIZE-12] = 0x0808;  // R11
-    Task[i].stack[STACK_SIZE-13] = 0x0707;  // R12
-    Task[i].stack[STACK_SIZE-14] = 0x0606;  // R13
-    Task[i].stack[STACK_SIZE-15] = 0x0505;  // R14
-    Task[i].stack[STACK_SIZE-16] = 0x0404;  // R15
+    //set the stack pointer - 15 off the top
+    Task[i].sp = &Task[i].stack[STACK_SIZE - 16]; //SP
 }
 
 
@@ -185,12 +200,17 @@ void SimpleOS_addThreads(void (*functionPtr1)(void), void (*functionPtr2)(void))
 
     SimpleOS_initStack(0);      //index of the TaskBlock
     //set the PC register to point to functionPtr1
-    Task[0].stack[STACK_SIZE - 1] = (int16_t)(functionPtr1);
-
+//    Task[0].stack[STACK_SIZE - 1] = (int16_t)(functionPtr1);
+    Task[0].stack[STACK_SIZE-4] = (int16_t)(functionPtr1);      //increment R15 2 times
+    Task[0].stack[STACK_SIZE-5] = (int16_t)(functionPtr1);      //increment R15 1 time
+    Task[0].stack[STACK_SIZE-6] = (int16_t)(functionPtr1);      //this should be at R15 - no incrementing required
 
     SimpleOS_initStack(1);      //index of the task block
     //set the PC register to the function to run
-    Task[1].stack[STACK_SIZE - 1] = (int16_t)(functionPtr2);
+//    Task[1].stack[STACK_SIZE - 1] = (int16_t)(functionPtr2);
+    Task[1].stack[STACK_SIZE-4] = (int16_t)(functionPtr2);
+    Task[1].stack[STACK_SIZE-5] = (int16_t)(functionPtr2);
+    Task[1].stack[STACK_SIZE-6] = (int16_t)(functionPtr2);
 
     RunPt = &Task[0];
 
@@ -204,55 +224,97 @@ void SimpleOS_launch(void)
 }
 
 
-void SimpleOS_start(void)
+void __attribute__((naked))
+SimpleOS_start(void)
 {
     __asm("MOV  &RunPt, R4\n");
-    __asm("MOV  @R4, R5\n");
-    __asm("MOV  @R5, SP\n");
 
-    __asm("POP R6\n");
-    __asm("POP R7\n");
-    __asm("POP R8\n");
+    //This reuslts in the SP looking at the task SP.  Future pops from here
+    //will pop values from the task SP into various target registers.
+    __asm("MOV  @R4, SP\n");
+
+    __asm("POP R5\n");              //stack - 16
+    __asm("POP R6\n");              //stack - 15
+    __asm("POP R7\n");              //stack - 14
+    __asm("POP R8\n");              //stack - 13
     __asm("POP R9\n");
     __asm("POP R10\n");
     __asm("POP R11\n");
     __asm("POP R12\n");
     __asm("POP R13\n");
-    __asm("POP R14\n");
-    __asm("POP R15\n");
-    __asm("ADD SP, SP,#2\n");
-    __asm("POP SR\n");
-    __asm("ADD SP, SP,#2\n");
+    __asm("POP R14\n");             //stack - 7
 
-    //enable all the interrupts
-    __bis_SR_register(GIE);
+    //This line here - SP is already at the address loaded with
+    //a function to run.  Copy it into R15, increment as needed
+    //and load it back into SP anyway.
+    __asm("MOV  SP, R15\n");
 
+    //copy it back.  We can to an increment R15
+    //ie, INC, R15 if needed.
+    //we can increment the contented looked at by
+    //R15 by doing a INC, @R15.
+    __asm("MOV R15, SP\n");
+
+    //enable global interrupts - one instruction
+    //no impact on the stack / registers
+   __bis_SR_register(GIE);          //set the GIE bit in SR
+
+   //After This instruction, PC is loaded with contents
+   //of the SP.
     __asm("RET\n");
 }
 
 
+
+
+
+
 /*
  *
- * void __attribute__((naked))
+ *
+ *
+ *
+void __attribute__((naked))
 SimpleOS_start(void)
 {
-    __asm(  "LDR     R0, =RunPt\n"  //set R0 to the current task.  tcb element 0 is the sp
-            "LDR     R2, [R0]\n"    //set R2 with the contents of R0
-            "LDR     SP, [R2]\n"    //set StackPointer (SP) to RunPt (ie, stored tcb.sp) - remapping SP to different stack??
-            "POP     {R4-R11}\n"    //R4-R11 showup where?
-            "POP     {R0-R3}\n"
-            "POP     {R12}\n"
-            "ADD     SP,SP,#4\n"
-            "POP     {LR}\n"
-            "ADD     SP,SP,#4\n"
-            "CPSIE   I\n"           //enable interrupts
-            "BX      LR\n");        //the PC should be pointing to task function 1
+    __asm("MOV  &RunPt, R4\n");
+
+    //This reuslts in the SP looking at the task SP.  Future pops from here
+    //will pop values from the task SP into various target registers.
+    __asm("MOV  @R4, SP\n");
+
+    __asm("POP R6\n");              //stack - 16
+    __asm("POP R7\n");              //stack - 15
+    __asm("POP R8\n");              //stack - 14
+    __asm("POP R9\n");
+    __asm("POP R10\n");
+    __asm("POP R11\n");
+    __asm("POP R12\n");
+    __asm("POP R13\n");
+    __asm("POP R14\n");             //stack - 8
+
+
+    //we want to move the SP to spot that contains the function
+    //pointer, then pop that into the ....... R3???
+    //let's use R15
+    //move to the address of the function pointer..
+    //
+    __asm("MOV  SP, R15\n");       //move the address, not the contents
+    __asm("INC R15\n");         //increment till you get to the top - 1
+    __asm("INC R15\n");
+    __asm("INC R15\n");
+    __asm("INC R15\n");                 //0xC180 - just before 0x0202
+    __asm("MOV R15, SP\n");            //setup the SP to pop next address into function to run
+
+    //enable all the interrupts
+//    __bis_SR_register(GIE);
+
+    __asm("RET\n");
 }
 
  *
  *
  */
-
 
 
 ///////////////////////////////////////////////////////
@@ -286,7 +348,7 @@ __attribute__((interrupt(TIMER0_A0_VECTOR))) void Timer_A(void)
     //clear the timer interrupt
     TACTL &=~ BIT0;
 
-    __asm("PUSH    R6\n");
+    __asm("PUSH    R6\n");      //puts R6 into contents looked at by the SP
     __asm("PUSH    R7\n");
     __asm("PUSH    R8\n");
     __asm("PUSH    R9\n");
@@ -315,6 +377,23 @@ __attribute__((interrupt(TIMER0_A0_VECTOR))) void Timer_A(void)
     __asm("POP    R10\n");
     __asm("POP    R11\n");
 
+}
+
+
+
+void TaskFunction1(void)
+{
+    while (1)
+    {
+        LED_RED_TOGGLE();
+    }
+}
+void TaskFunction2(void)
+{
+    while (1)
+    {
+        LED_GREEN_TOGGLE();
+    }
 }
 
 
