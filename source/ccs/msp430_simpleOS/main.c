@@ -171,19 +171,22 @@ void SimpleOS_initStack(uint8_t i)
     Task[i].stack[STACK_SIZE-3] = 0x0202;   // R2 - SR
     Task[i].stack[STACK_SIZE-4] = 0x0303;   // R3 - leave this alone!!! - dont pop anything into this
     Task[i].stack[STACK_SIZE-5] = 0x0F0F;   // R15 - this is the last pop - 0x0F0F into R15
-    Task[i].stack[STACK_SIZE-6] = 0x0F0F;   // R15
-    Task[i].stack[STACK_SIZE-7] = 0x0E0E;   // R14
-    Task[i].stack[STACK_SIZE-8] = 0x0D0D;   // R13
-    Task[i].stack[STACK_SIZE-9] = 0x0C0C;   // R12
-    Task[i].stack[STACK_SIZE-10] = 0x0B0B;  // R11
-    Task[i].stack[STACK_SIZE-11] = 0x0A0A;  // R10
-    Task[i].stack[STACK_SIZE-12] = 0x0909;  // R9
-    Task[i].stack[STACK_SIZE-13] = 0x0808;  // R8
-    Task[i].stack[STACK_SIZE-14] = 0x0707;  // R7 - this is the second pop
-    Task[i].stack[STACK_SIZE-15] = 0x0606;  // R6 - After setting the SP, 0404 is the first pop
-    Task[i].stack[STACK_SIZE-16] = 0x0505;  // R5 - After setting the SP, 0404 is the first pop
+    Task[i].stack[STACK_SIZE-6] = 0x0E0E;   // R14
+    Task[i].stack[STACK_SIZE-7] = 0x0D0D;   // R13
+    Task[i].stack[STACK_SIZE-8] = 0x0C0C;   // R12
+    Task[i].stack[STACK_SIZE-9] = 0x0B0B;   // R11
+    Task[i].stack[STACK_SIZE-10] = 0x0A0A;  // R10
+    Task[i].stack[STACK_SIZE-11] = 0x0909;  // R9
+    Task[i].stack[STACK_SIZE-12] = 0x0808;  // R8
+    Task[i].stack[STACK_SIZE-13] = 0x0707;  // R7
+    Task[i].stack[STACK_SIZE-14] = 0x0606;  // R6 - this is the second pop
+    Task[i].stack[STACK_SIZE-15] = 0x0505;  // R5 - After setting the SP, 0404 is the first pop
+    Task[i].stack[STACK_SIZE-16] = 0x0404;  // R4 - After setting the SP, 0404 is the first pop
 
-    //set the stack pointer - 15 off the top
+    //set the stack pointer - see datasheet
+    //This needs to be at 16 because on setup and the isr, we pop
+    //into a higher address, so we start at the bottom set
+    //of the registers
     Task[i].sp = &Task[i].stack[STACK_SIZE - 16]; //SP
 }
 
@@ -194,6 +197,9 @@ void SimpleOS_addThreads(void (*functionPtr1)(void), void (*functionPtr2)(void))
 //    long sr = 0x00;
 //    sr = SimpleOS_enterCritical();
 
+    //disable interrupts
+   __bic_SR_register(GIE);          //clear the GIE bit in SR
+
     //configure the linked list of task control blocks
     Task[0].next = &Task[1];    // 0 points to 1
     Task[1].next = &Task[0];    // 1 points to 2
@@ -201,16 +207,13 @@ void SimpleOS_addThreads(void (*functionPtr1)(void), void (*functionPtr2)(void))
     SimpleOS_initStack(0);      //index of the TaskBlock
     //set the PC register to point to functionPtr1
 //    Task[0].stack[STACK_SIZE - 1] = (int16_t)(functionPtr1);
-    Task[0].stack[STACK_SIZE-4] = (int16_t)(functionPtr1);      //increment R15 2 times
-    Task[0].stack[STACK_SIZE-5] = (int16_t)(functionPtr1);      //increment R15 1 time
-    Task[0].stack[STACK_SIZE-6] = (int16_t)(functionPtr1);      //this should be at R15 - no incrementing required
+    Task[0].stack[STACK_SIZE-2] = (int16_t)(functionPtr1);      //increment R15 4 times
+
 
     SimpleOS_initStack(1);      //index of the task block
     //set the PC register to the function to run
 //    Task[1].stack[STACK_SIZE - 1] = (int16_t)(functionPtr2);
-    Task[1].stack[STACK_SIZE-4] = (int16_t)(functionPtr2);
-    Task[1].stack[STACK_SIZE-5] = (int16_t)(functionPtr2);
-    Task[1].stack[STACK_SIZE-6] = (int16_t)(functionPtr2);
+    Task[1].stack[STACK_SIZE-2] = (int16_t)(functionPtr2);
 
     RunPt = &Task[0];
 
@@ -227,33 +230,46 @@ void SimpleOS_launch(void)
 void __attribute__((naked))
 SimpleOS_start(void)
 {
-    __asm("MOV  &RunPt, R4\n");
+//    __asm("MOV  &RunPt, R4\n");
 
     //This reuslts in the SP looking at the task SP.  Future pops from here
     //will pop values from the task SP into various target registers.
-    __asm("MOV  @R4, SP\n");
+//    __asm("MOV  @R4, SP\n");
 
-    __asm("POP R5\n");              //stack - 16
-    __asm("POP R6\n");              //stack - 15
-    __asm("POP R7\n");              //stack - 14
-    __asm("POP R8\n");              //stack - 13
+    __asm("MOV &RunPt, SP\n");      //sets the SP to the address of RunPt (not contents, the address)
+    __asm("MOV @SP, SP\n");         //moves the contents at SP into the address of SP
+
+    __asm("POP R4\n");              //stack - 16
+    __asm("POP R5\n");              //stack - 15
+    __asm("POP R6\n");              //stack - 14
+    __asm("POP R7\n");              //stack - 13
+    __asm("POP R8\n");              //stack - 12
     __asm("POP R9\n");
     __asm("POP R10\n");
     __asm("POP R11\n");
     __asm("POP R12\n");
     __asm("POP R13\n");
-    __asm("POP R14\n");             //stack - 7
+    __asm("POP R14\n");             //stack - 6
+    __asm("POP R15\n");             //stack - 5
+
+    __asm("MOV  SP, R15\n");
+    __asm("INC R15\n");
+    __asm("INC R15\n");
+    __asm("INC R15\n");
+    __asm("INC R15\n");
+    __asm("MOV R15, SP\n");
+
 
     //This line here - SP is already at the address loaded with
     //a function to run.  Copy it into R15, increment as needed
     //and load it back into SP anyway.
-    __asm("MOV  SP, R15\n");
+//    __asm("MOV  SP, R15\n");
 
     //copy it back.  We can to an increment R15
     //ie, INC, R15 if needed.
     //we can increment the contented looked at by
     //R15 by doing a INC, @R15.
-    __asm("MOV R15, SP\n");
+//    __asm("MOV R15, SP\n");
 
     //enable global interrupts - one instruction
     //no impact on the stack / registers
