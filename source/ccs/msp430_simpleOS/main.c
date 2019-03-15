@@ -56,8 +56,6 @@ void SimpleOS_launch(void);
 void SimpleOS_start(void);
 
 
-
-
 TaskBlock Task[2];
 TaskBlock *RunPt;
 
@@ -281,8 +279,28 @@ SimpleOS_start(void)
 }
 
 
-
-
+/*
+///////////////////////////////////////////////////////
+//Systick_Handler
+//
+void __attribute__((naked))
+SysTick_Handler(void)
+{
+    __asm(  "CPSID   I\n"
+            "PUSH    {R4-R11}\n"
+            "LDR     R0, =RunPt\n"
+            "LDR     R1, [R0]\n"
+            "STR     SP, [R1]\n"
+            "PUSH    {R0, LR}\n"
+            "BL      SimpleOS_scheduler\n"
+            "POP     {R0, LR}\n"
+            "LDR     R1, [R0]\n"
+            "LDR     SP, [R1]\n"
+            "POP     {R4-R11}\n"
+            "CPSIE   I\n"
+            "BX      LR\n");
+}
+*/
 
 
 //interrupt routine for using GNU compiler
@@ -290,7 +308,7 @@ __attribute__((interrupt(TIMER0_A0_VECTOR))) void Timer_A(void)
 {
     //clear the timer interrupt
     TACTL &=~ BIT0;
-
+//    Timer_ISR();
 
     //disable all the interrupts
     __bic_SR_register(GIE);
@@ -305,16 +323,26 @@ __attribute__((interrupt(TIMER0_A0_VECTOR))) void Timer_A(void)
     __asm("PUSH R12\n");
     __asm("PUSH R13\n");
     __asm("PUSH R14\n");             //stack - 7
+    __asm("PUSH R15\n");             //stack - 7
 
+    //store the current stack pointer in RunPt
     __asm("MOV  &RunPt, R4\n");
+    __asm("MOV  @R4, R4\n");    //break contents in R4 up as R4
+    __asm("MOV SP, @R4\n");     //store the SP in R4
 
-    //This reuslts in the SP looking at the task SP.  Future pops from here
-    //will pop values from the task SP into various target registers.
-    __asm("MOV  @R4, SP\n");
-
+    __asm("PUSH R4\n");
     __asm("CALL     #SimpleOS_scheduler\n");     //call the scheduler
+    __asm("POP R4\n");
 
-    __asm("MOV  @R4, SP\n");
+    //__asm("MOV  @R4, SP\n");
+    //__asm("MOV @SP, SP\n");
+
+
+//    __asm("MOV R4, SP\n");
+
+    __asm("MOV &RunPt, SP\n");      //sets the SP to the address of RunPt (not contents, the address)
+    __asm("MOV @SP, SP\n");         //moves the contents at SP into the address of SP
+
 
 
     __asm("POP R5\n");              //stack - 16
@@ -327,6 +355,7 @@ __attribute__((interrupt(TIMER0_A0_VECTOR))) void Timer_A(void)
     __asm("POP R12\n");
     __asm("POP R13\n");
     __asm("POP R14\n");             //stack - 7
+    __asm("POP R15\n");             //stack - 7
 
     //enable all the interrupts
     __bis_SR_register(GIE);
@@ -338,11 +367,16 @@ __attribute__((interrupt(TIMER0_A0_VECTOR))) void Timer_A(void)
 
 void TaskFunction1(void)
 {
+ //   uint32_t counter = 0x00;
     while (1)
     {
-        LED_RED_TOGGLE();
+//        if (!(counter % 20000))
+            LED_RED_TOGGLE();
+
+ //       counter++;
     }
 }
+
 void TaskFunction2(void)
 {
     while (1)
