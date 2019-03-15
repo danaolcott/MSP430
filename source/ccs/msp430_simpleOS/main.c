@@ -54,10 +54,18 @@ void SimpleOS_initStack(uint8_t i);
 void SimpleOS_addThreads(void (*functionPtr1)(void), void (*functionPtr2)(void));
 void SimpleOS_launch(void);
 void SimpleOS_start(void);
+void SimpleOS_check(void);
 
 
 TaskBlock Task[2];
 TaskBlock *RunPt;
+
+
+
+
+int16_t* stackPtr1;
+int16_t* stackPtr2;
+int16_t* stackPtr3;
 
 
 
@@ -164,22 +172,22 @@ void SimpleOS_initStack(uint8_t i)
 {
     /////////////////////////////////////////////////
     //PC  - stack_size - 1
-    Task[i].stack[STACK_SIZE-1] = 0x1010;   // R0 - PC
-    Task[i].stack[STACK_SIZE-2] = 0x0101;   // R1 - SP - contents at the address hold the next instruction - shows up in the PC register
-    Task[i].stack[STACK_SIZE-3] = 0x0202;   // R2 - SR
-    Task[i].stack[STACK_SIZE-4] = 0x0303;   // R3 - leave this alone!!! - dont pop anything into this
-    Task[i].stack[STACK_SIZE-5] = 0x0F0F;   // R15 - this is the last pop - 0x0F0F into R15
-    Task[i].stack[STACK_SIZE-6] = 0x0E0E;   // R14
-    Task[i].stack[STACK_SIZE-7] = 0x0D0D;   // R13
-    Task[i].stack[STACK_SIZE-8] = 0x0C0C;   // R12
-    Task[i].stack[STACK_SIZE-9] = 0x0B0B;   // R11
-    Task[i].stack[STACK_SIZE-10] = 0x0A0A;  // R10
-    Task[i].stack[STACK_SIZE-11] = 0x0909;  // R9
-    Task[i].stack[STACK_SIZE-12] = 0x0808;  // R8
-    Task[i].stack[STACK_SIZE-13] = 0x0707;  // R7
-    Task[i].stack[STACK_SIZE-14] = 0x0606;  // R6 - this is the second pop
-    Task[i].stack[STACK_SIZE-15] = 0x0505;  // R5 - After setting the SP, 0404 is the first pop
-    Task[i].stack[STACK_SIZE-16] = 0x0404;  // R4 - After setting the SP, 0404 is the first pop
+    Task[i].stack[STACK_SIZE-1] = (0x1000 + i*(1u << 15));   // R0 - PC
+    Task[i].stack[STACK_SIZE-2] = (0x0110 + i*(1u << 15));   // R1 - SP - contents at the address hold the next instruction - shows up in the PC register
+    Task[i].stack[STACK_SIZE-3] = (0x0220 + i*(1u << 15));   // R2 - SR
+    Task[i].stack[STACK_SIZE-4] = (0x0330 + i*(1u << 15));   // R3 - leave this alone!!! - dont pop anything into this
+    Task[i].stack[STACK_SIZE-5] = (0x0FF0 + i*(1u << 15));   // R15 - this is the last pop - 0x0F0F into R15
+    Task[i].stack[STACK_SIZE-6] = (0x0EE0 + i*(1u << 15));   // R14
+    Task[i].stack[STACK_SIZE-7] = (0x0DD0 + i*(1u << 15));   // R13
+    Task[i].stack[STACK_SIZE-8] = (0x0CC0 + i*(1u << 15));   // R12
+    Task[i].stack[STACK_SIZE-9] = (0x0BB0 + i*(1u << 15));   // R11
+    Task[i].stack[STACK_SIZE-10] = (0x0AA0 + i*(1u << 15));  // R10
+    Task[i].stack[STACK_SIZE-11] = (0x0990 + i*(1u << 15));  // R9
+    Task[i].stack[STACK_SIZE-12] = (0x0880 + i*(1u << 15));  // R8
+    Task[i].stack[STACK_SIZE-13] = (0x0770 + i*(1u << 15));  // R7
+    Task[i].stack[STACK_SIZE-14] = (0x0660 + i*(1u << 15));  // R6 - this is the second pop
+    Task[i].stack[STACK_SIZE-15] = (0x0550 + i*(1u << 15));  // R5 - After setting the SP, 0404 is the first pop
+    Task[i].stack[STACK_SIZE-16] = (0x0440 + i*(1u << 15));  // R4 - After setting the SP, 0404 is the first pop
 
     //set the stack pointer - see datasheet
     //This needs to be at 16 because on setup and the isr, we pop
@@ -234,28 +242,28 @@ SimpleOS_start(void)
     //will pop values from the task SP into various target registers.
 //    __asm("MOV  @R4, SP\n");
 
-    __asm("MOV &RunPt, SP\n");      //sets the SP to the address of RunPt (not contents, the address)
-    __asm("MOV @SP, SP\n");         //moves the contents at SP into the address of SP
+    __asm("MOV &RunPt, SP\n");      //set the location of SP = location of Run PT. Contents at SP = Contents of RunPt
+    __asm("MOV @SP, SP\n");         //set the location of SP = contents of SP.
 
-    __asm("POP R4\n");              //stack - 16
-    __asm("POP R5\n");              //stack - 15
-    __asm("POP R6\n");              //stack - 14
-    __asm("POP R7\n");              //stack - 13
-    __asm("POP R8\n");              //stack - 12
-    __asm("POP R9\n");
+    __asm("POP R4\n");              //set location of R4 = stack - 16
+    __asm("POP R5\n");              //set location of R5 = stack - 15
+    __asm("POP R6\n");              //set location of R6 = stack - 14
+    __asm("POP R7\n");              //set location of R7 = stack - 13
+    __asm("POP R8\n");              //set location of R8 = stack - 12
+    __asm("POP R9\n");              //set location of R9 = stack - 11
     __asm("POP R10\n");
     __asm("POP R11\n");
     __asm("POP R12\n");
     __asm("POP R13\n");
-    __asm("POP R14\n");             //stack - 6
-    __asm("POP R15\n");             //stack - 5
+    __asm("POP R14\n");             //set location of R14 = stack - 6
+    __asm("POP R15\n");             //set location of R15 = stack - 5
 
-    __asm("MOV  SP, R15\n");
+    __asm("MOV  SP, R15\n");        //SP = 2ae(0330), R15 = 0xFF0(0x5325)  ---- after SP same, R15 = 0x2ae(0x0330)
+    __asm("INC R15\n");             //SP - same, R15 = 0x02AF(0x0330 - word aligned)
+    __asm("INC R15\n");             //SP - same, R15 = 0x02b0 (0x0220)
     __asm("INC R15\n");
-    __asm("INC R15\n");
-    __asm("INC R15\n");
-    __asm("INC R15\n");
-    __asm("MOV R15, SP\n");
+    __asm("INC R15\n");             //results: SP - same 0x02ae(0x0330), R15 = 0x02b2(0xc180)
+    __asm("MOV R15, SP\n");         //SP = 0x2b2(0xC180), R15 = 0x2b2(0xc180)
 
 
     //This line here - SP is already at the address loaded with
@@ -279,71 +287,62 @@ SimpleOS_start(void)
 }
 
 
-/*
-///////////////////////////////////////////////////////
-//Systick_Handler
+
+
+///////////////////////////////////////////////////
+//Periodically call CheckStack -
+//Push CPU registers onto the stack.
+//save the stack pointer.
+//push R4
+//pop r4
+//set the SP = RunPt.sp
+//pop stack into CPU registers
+//
+//The idea is that there should be no change.
+//to the stack, and resume where it left off
 //
 void __attribute__((naked))
-SysTick_Handler(void)
+SimpleOS_check(void)
 {
-    __asm(  "CPSID   I\n"
-            "PUSH    {R4-R11}\n"
-            "LDR     R0, =RunPt\n"
-            "LDR     R1, [R0]\n"
-            "STR     SP, [R1]\n"
-            "PUSH    {R0, LR}\n"
-            "BL      SimpleOS_scheduler\n"
-            "POP     {R0, LR}\n"
-            "LDR     R1, [R0]\n"
-            "LDR     SP, [R1]\n"
-            "POP     {R4-R11}\n"
-            "CPSIE   I\n"
-            "BX      LR\n");
-}
-*/
+    __asm("MOV SP, &stackPtr1\n");  //save SP on entry
 
-
-//interrupt routine for using GNU compiler
-__attribute__((interrupt(TIMER0_A0_VECTOR))) void Timer_A(void)
-{
-    //clear the timer interrupt
-    TACTL &=~ BIT0;
-//    Timer_ISR();
-
-    //disable all the interrupts
-    __bic_SR_register(GIE);
-
-    __asm("PUSH R5\n");              //stack - 16
-    __asm("PUSH R6\n");              //stack - 15
-    __asm("PUSH R7\n");              //stack - 14
-    __asm("PUSH R8\n");              //stack - 13
+    __asm("PUSH R5\n");     //sp=0x02b4(0xc3e8), r5 = 0x0550 -> stack grows 2 down, populates 0x02b2 with 0x0550
+    __asm("PUSH R6\n");     //sp = 0x02b0 (0x0660)
+    __asm("PUSH R7\n");
+    __asm("PUSH R8\n");
     __asm("PUSH R9\n");
     __asm("PUSH R10\n");
     __asm("PUSH R11\n");
     __asm("PUSH R12\n");
     __asm("PUSH R13\n");
-    __asm("PUSH R14\n");             //stack - 7
-    __asm("PUSH R15\n");             //stack - 7
+    __asm("PUSH R14\n");
+    __asm("PUSH R15\n");
 
-    //store the current stack pointer in RunPt
-    __asm("MOV  &RunPt, R4\n");
-    __asm("MOV  @R4, R4\n");    //break contents in R4 up as R4
-    __asm("MOV SP, @R4\n");     //store the SP in R4
+    __asm("MOV SP, &stackPtr2\n");
+
+    //store the SP into RunPt.sp - before - R4 = 0x0440(0x0000), RunPt* = 0x218, sp = 0x029c
+    __asm("MOV  &RunPt, R4\n"); //set R4 = RunPt!!!!   after - RunPt - no change, R4 = 0x218 (0x029c)
+
+    //ie, we use R4 as the transfer mechanism to swap RunPT
+    //store SP into RunPt - address and contents
+    //SP should be stored in RunPt.sp
+    __asm("MOV SP, @R4\n");         //move SP into contents of R4.  r4 now...... R4 = 0x0218(0x029E).  ie, contents at R4 = stackPtr2.  also, RunPt.sp = 0x029E
 
     __asm("PUSH R4\n");
-    __asm("CALL     #SimpleOS_scheduler\n");     //call the scheduler
+
+    //this is where we swap - ie, R4 address should stay same 0x212, but contents should be new RunPt*
+
     __asm("POP R4\n");
 
-    //__asm("MOV  @R4, SP\n");
-    //__asm("MOV @SP, SP\n");
+    //set SP = RunPt-SP - this is reloading it from before -
+    //R4 should conain RunPt
+//    __asm("MOV R4, SP");        //error.  should be the contents of R4, this sets the SP = 218, should be 0x029E
+    __asm("MOV @R4, SP");        //Move contents in R4 to SP - ie, set SP = memory contents stored at reg. R4.
 
 
-//    __asm("MOV R4, SP\n");
+    __asm("MOV SP, &stackPtr3\n");
 
-    __asm("MOV &RunPt, SP\n");      //sets the SP to the address of RunPt (not contents, the address)
-    __asm("MOV @SP, SP\n");         //moves the contents at SP into the address of SP
-
-
+    //pop r5 - r15
 
     __asm("POP R5\n");              //stack - 16
     __asm("POP R6\n");              //stack - 15
@@ -358,22 +357,100 @@ __attribute__((interrupt(TIMER0_A0_VECTOR))) void Timer_A(void)
     __asm("POP R15\n");             //stack - 7
 
     //enable all the interrupts
-    __bis_SR_register(GIE);
+ //   __bis_SR_register(GIE);
 
     __asm("RET\n");
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+//interrupt routine for using GNU compiler
+//void __attribute__((naked))
+//__attribute__((interrupt(TIMER0_A0_VECTOR))) Timer_A(void)
+
+__attribute__((interrupt(TIMER0_A0_VECTOR))) void Timer_A(void)
+{
+    //disable all the interrupts
+    __bic_SR_register(GIE);
+
+    //clear the timer interrupt
+    TACTL &=~ BIT0;
+
+    SimpleOS_check();
+
+
+//    __asm("CALL     #SimpleOS_check\n");     //call the scheduler
+
+    /*
+
+    __asm("PUSH R5\n");              //stack - 16
+    __asm("PUSH R6\n");              //stack - 15
+    __asm("PUSH R7\n");              //stack - 14
+    __asm("PUSH R8\n");              //stack - 13
+    __asm("PUSH R9\n");
+    __asm("PUSH R10\n");
+    __asm("PUSH R11\n");
+    __asm("PUSH R12\n");
+    __asm("PUSH R13\n");
+    __asm("PUSH R14\n");             //stack - 7
+
+    __asm("MOV  &RunPt, R4\n");
+
+    //This reuslts in the SP looking at the task SP.  Future pops from here
+    //will pop values from the task SP into various target registers.
+    __asm("MOV  @R4, SP\n");
+
+    __asm("CALL     #SimpleOS_scheduler\n");     //call the scheduler
+
+    __asm("MOV  @R4, SP\n");
+
+
+    __asm("POP R5\n");              //stack - 16
+    __asm("POP R6\n");              //stack - 15
+    __asm("POP R7\n");              //stack - 14
+    __asm("POP R8\n");              //stack - 13
+    __asm("POP R9\n");
+    __asm("POP R10\n");
+    __asm("POP R11\n");
+    __asm("POP R12\n");
+    __asm("POP R13\n");
+    __asm("POP R14\n");             //stack - 7
+
+    //enable all the interrupts
+
+    */
+
+    __bis_SR_register(GIE);
+
+    //__asm("RET\n");
 }
 
 
 
 void TaskFunction1(void)
 {
- //   uint32_t counter = 0x00;
+    uint32_t counter = 0x00;
+
     while (1)
     {
-//        if (!(counter % 20000))
+        if (!(counter % 2))
+        {
             LED_RED_TOGGLE();
 
- //       counter++;
+         //   SimpleOS_check();
+        }
+
+        counter++;
     }
 }
 
