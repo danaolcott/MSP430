@@ -214,12 +214,17 @@ void SimpleOS_addThreads(void (*functionPtr1)(void), void (*functionPtr2)(void))
     //set the PC register to point to functionPtr1
 //    Task[0].stack[STACK_SIZE - 1] = (int16_t)(functionPtr1);
     Task[0].stack[STACK_SIZE-2] = (int16_t)(functionPtr1);      //increment R15 4 times
+    Task[0].stack[STACK_SIZE-5] = (int16_t)(functionPtr1);      //increment R15 4 times
+    Task[0].stack[STACK_SIZE-6] = (int16_t)(functionPtr1);      //increment R15 4 times
 
 
     SimpleOS_initStack(1);      //index of the task block
     //set the PC register to the function to run
 //    Task[1].stack[STACK_SIZE - 1] = (int16_t)(functionPtr2);
     Task[1].stack[STACK_SIZE-2] = (int16_t)(functionPtr2);
+    Task[1].stack[STACK_SIZE-5] = (int16_t)(functionPtr2);      //increment R15 4 times
+    Task[1].stack[STACK_SIZE-6] = (int16_t)(functionPtr2);      //increment R15 4 times
+
 
     RunPt = &Task[0];
 
@@ -328,11 +333,14 @@ SimpleOS_check(void)
     //SP should be stored in RunPt.sp
     __asm("MOV SP, @R4\n");         //move SP into contents of R4.  r4 now...... R4 = 0x0218(0x029E).  ie, contents at R4 = stackPtr2.  also, RunPt.sp = 0x029E
 
-    __asm("PUSH R4\n");
+ //   __asm("PUSH R4\n");
 
-    //this is where we swap - ie, R4 address should stay same 0x212, but contents should be new RunPt*
+    //this is where we swap - R4 should be the same.  But the contents stored at R4 address should
+    //be the new RunPt
+    __asm("CALL #SimpleOS_scheduler\n");
+    __asm("MOV  &RunPt, R4\n");             //new line!! update R4 with new Run PT - set R4 = RunPT!!!
 
-    __asm("POP R4\n");
+ //   __asm("POP R4\n");
 
     //set SP = RunPt-SP - this is reloading it from before -
     //R4 should conain RunPt
@@ -436,21 +444,14 @@ __attribute__((interrupt(TIMER0_A0_VECTOR))) void Timer_A(void)
 }
 
 
+uint32_t counter1 = 0x00;
+uint32_t counter2 = 0x00;
 
 void TaskFunction1(void)
 {
-    uint32_t counter = 0x00;
-
     while (1)
     {
-        if (!(counter % 2))
-        {
-            LED_RED_TOGGLE();
-
-         //   SimpleOS_check();
-        }
-
-        counter++;
+        LED_RED_TOGGLE();
     }
 }
 
