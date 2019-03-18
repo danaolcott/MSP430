@@ -224,8 +224,7 @@ void SimpleOS_initStack(uint8_t i)
 //SimpleOS_addThreads.  Add two function to run pointers
 void SimpleOS_addThreads(void (*functionPtr1)(void), void (*functionPtr2)(void))
 {
-//    long sr = 0x00;
-//    sr = SimpleOS_enterCritical();
+    SimpleOS_enterCritical();
 
     //disable interrupts
    __bic_SR_register(GIE);          //clear the GIE bit in SR
@@ -246,7 +245,7 @@ void SimpleOS_addThreads(void (*functionPtr1)(void), void (*functionPtr2)(void))
 
     RunPt = &Task[0];
 
-//    SimpleOS_exitCritical(sr);
+    SimpleOS_exitCritical();
 }
 
 /////////////////////////////////////////////
