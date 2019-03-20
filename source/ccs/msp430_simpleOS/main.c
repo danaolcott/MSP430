@@ -34,6 +34,9 @@ void LED_GREEN_TOGGLE(void);
 
 void TaskFunction1(void);
 void TaskFunction2(void);
+void TaskFunction3(void);
+void TaskFunction4(void);
+
 
 
 ////////////////////////////////////////////////
@@ -45,6 +48,9 @@ void TimerISR_DefaultHandler(void);
 //Task Counters
 volatile uint32_t counter1 = 0x00;
 volatile uint32_t counter2 = 0x00;
+volatile uint32_t counter3 = 0x00;
+volatile uint32_t counter4 = 0x00;
+
 
 //main program
 int main(void)
@@ -52,13 +58,19 @@ int main(void)
     //disable the watchdog timer
     WDTCTL = WDTPW + WDTHOLD;
 
+    //disable interupts
+    __bic_SR_register(GIE);
+
     //Pass Timer handler into the timer config as function to run on timeout
-    TimerA_init(SimpleOS_ISR);
     GPIO_init();
+    TimerA_init(&SimpleOS_ISR);
 
     //Configure the tasks and start the OS
-    SimpleOS_init();
-    SimpleOS_addThreads(TaskFunction1, TaskFunction2);
+    SimpleOS_init(TaskFunction1);
+    SimpleOS_addThread(TaskFunction2);
+    SimpleOS_addThread(TaskFunction3);
+    SimpleOS_addThread(TaskFunction4);
+
     SimpleOS_launch();
 
     //Should never make it here
@@ -79,13 +91,32 @@ void GPIO_init(void)
 
     P1OUT &=~ BIT0;     //turn off
     P1OUT &=~ BIT6;     //turn off
+
+    //Configure 2 more pins - P2.0 and P2.1
+    //for toggling in Tasks 3 and 4
+    P2DIR |= BIT0;
+    P2DIR |= BIT1;
+    P2DIR |= BIT2;
+
+
+    P2OUT &=~ BIT0;
+    P2OUT &=~ BIT1;
+    P2OUT &=~ BIT2;
+
 }
 
-//////////////////////////////////////////////
+/////////////////////////////////////////////////////
 //TimerA_init
-//Set the CPU speed to 16mhz and configure the
-//timer to timeout and interrupt at 1khz.
-//Pass pointer
+//Set the CPU speed to 16mhz and configure the timer
+//to timeout and interrupt at 100hz, 10ms timeslices.
+//NOTE:  Keep an eye on the timer reload value.  Although
+//2000 will result in 1ms time slice, the counter keeps running
+//during the ISR (strange).  If it overflows, it will generate
+//another interrupt right on exit.  This will mess up the context
+//switch.
+//
+//Argument: Pointer to function to run in the ISR
+//
 void TimerA_init(void (*functionPtr)(void))
 {
     if (functionPtr != NULL)
@@ -106,7 +137,20 @@ void TimerA_init(void (*functionPtr)(void))
     TACTL &=~ BIT0;     //clear all pending interrupts
 
     //set the countup value for 1ms delay
-    TACCR0 = 2000;      //use 2000 for 16 mhz
+    //TACCR0 = 2000;      //use 2000 for 16 mhz
+
+    ///////////////////////////////////////////////////
+    //This value sets the timeout frequency.
+    //For a 16mhz clock, use the following values:
+    //1ms = 2000;
+    //2ms = 4000;
+    //4ms = 8000;
+    //10ms = 20000;
+    //... etc
+    TACCR0 = 4000;
+
+    //reset the timer counter
+    TA0R = 0x00;
 
     //TACCTL0 - compare capture control register.
     //this has to be set up along with the timer interrupt
@@ -135,7 +179,6 @@ void LED_GREEN_TOGGLE(void)
 __attribute__((interrupt(TIMER0_A0_VECTOR))) void Timer_A(void)
 {
     TACTL &=~ BIT0;     //clear the timer interrupt flag
-
     (*gTimerISRHandler)();
 }
 
@@ -154,15 +197,16 @@ void TimerISR_DefaultHandler(void)
 
 ///////////////////////////////////////////
 //TaskFunction1
+//Since there are no delays, the frequency
+//should not depend on the value of the timeslice
+//
 void TaskFunction1(void)
 {
     while (1)
     {
         if (!(counter1 % 2000))
         {
-            SimpleOS_EnterCritical();
             LED_RED_TOGGLE();
-            SimpleOS_ExitCritical();
         }
 
         counter1++;
@@ -186,7 +230,35 @@ void TaskFunction2(void)
 
 
 
+//////////////////////////////////////////////
+//TaskFunction2
+void TaskFunction3(void)
+{
+    while (1)
+    {
+        if (!(counter3 % 2000))
+        {
+            P2OUT ^= BIT0;
+        }
 
+        counter3++;
+    }
+}
+
+//////////////////////////////////////////////
+//TaskFunction2
+void TaskFunction4(void)
+{
+    while (1)
+    {
+        if (!(counter4 % 2000))
+        {
+            P2OUT ^= BIT1;
+        }
+
+        counter4++;
+    }
+}
 
 
 

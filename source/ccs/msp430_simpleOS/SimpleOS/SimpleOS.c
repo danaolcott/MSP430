@@ -13,25 +13,20 @@
 
 #include "SimpleOS.h"
 
+#include "Task.h"
 
 
-
-
+#define TAR_REG         (*(volatile int16_t*(0x0170)))
 //////////////////////////////////////////
 //Temporary storage - not required
 volatile int16_t* stackPtr1;
 volatile int16_t* stackPtr2;
 volatile int16_t* stackPtr3;
+volatile int16_t* gTimerACounterRegister = 0x0170;
 
 volatile uint16_t gStatusRegister = 0x00;        //enter/exit critical
 
-
-///////////////////////////////////////////
-//Task Array and pointer to current task
-TaskBlock Task[2];
-TaskBlock *RunPt;
-
-
+TaskStruct* RunPt;
 
 
 
@@ -39,88 +34,57 @@ TaskBlock *RunPt;
 //SimpleOS Related Calls
 /////////////////////////////////////////////
 //SimpleOS_init
-//
-void SimpleOS_init(void)
+//Disable global interrupts, init the default task
+void SimpleOS_init(void (*functionPtr)(void))
 {
     __bic_SR_register(GIE);     //disable all interrupts
-}
 
+    //returns the head of the TaskList
+    RunPt = Task_init(functionPtr);
 
-/////////////////////////////////////////////////
-//Scheduler
-//Called in the SimpleOS_ISR.
-void SimpleOS_scheduler(void)
-{
-    RunPt = RunPt->next;
 }
 
 
 
-//////////////////////////////////////////////////
-//SimpleOS_initStack()
-//Set up initial stack values such that when pop
-//opperation is called, they align with the appropriate
-//registers.
-//NOTE: function to run ptr is set in another function,
-//but it aligns with Stack_size - 5 using the sequence in
-//SimpleOS_start and the context switch.
-//i = index in the task array
-void SimpleOS_initStack(uint8_t i)
-{
-    /////////////////////////////////////////////////
-    Task[i].stack[STACK_SIZE-1] = (0x1000 + i*(1u << 15));   // R0 - PC
-    Task[i].stack[STACK_SIZE-2] = (0x0110 + i*(1u << 15));   // R1 - SP - address of SP holds contents of next instruction when returning from a function
-    Task[i].stack[STACK_SIZE-3] = (0x0220 + i*(1u << 15));   // R2 - SR - holds the GIE bit
-    Task[i].stack[STACK_SIZE-4] = (0x0330 + i*(1u << 15));   // R3 - Leave this alone.
-    Task[i].stack[STACK_SIZE-5] = (0x0FF0 + i*(1u << 15));   // R15 - working reg
-    Task[i].stack[STACK_SIZE-6] = (0x0EE0 + i*(1u << 15));   // R14 - working reg
-    Task[i].stack[STACK_SIZE-7] = (0x0DD0 + i*(1u << 15));   // R13 -  ....
-    Task[i].stack[STACK_SIZE-8] = (0x0CC0 + i*(1u << 15));   // R12
-    Task[i].stack[STACK_SIZE-9] = (0x0BB0 + i*(1u << 15));   // R11
-    Task[i].stack[STACK_SIZE-10] = (0x0AA0 + i*(1u << 15));  // R10
-    Task[i].stack[STACK_SIZE-11] = (0x0990 + i*(1u << 15));  // R9
-    Task[i].stack[STACK_SIZE-12] = (0x0880 + i*(1u << 15));  // R8
-    Task[i].stack[STACK_SIZE-13] = (0x0770 + i*(1u << 15));  // R7
-    Task[i].stack[STACK_SIZE-14] = (0x0660 + i*(1u << 15));  // R6 - working reg
-    Task[i].stack[STACK_SIZE-15] = (0x0550 + i*(1u << 15));  // R5 - R5 is the last pop/push
-    Task[i].stack[STACK_SIZE-16] = (0x0440 + i*(1u << 15));  // R4 - R4 - used for args.
-
-    //set the initial stack pointer location.  This should be set
-    //to allow push/pop operations to not overflow the stack.
-    //pop - increment the SP, push - decrement the sp.
-    //stack - 16 works with the pop/push routines in initial setup
-    //and the context switch.
-    Task[i].sp = &Task[i].stack[STACK_SIZE - 16]; //SP
-}
 
 
 ///////////////////////////////////////////////////////
-//SimpleOS_addThreads.  Add two function to run pointers
-void SimpleOS_addThreads(void (*functionPtr1)(void), void (*functionPtr2)(void))
+//SimpleOS_addThread.
+//Append new task in the linked task list.  Update the
+//RunPt to the head of the list.
+//
+void SimpleOS_addThread(void (*functionPtr)(void))
 {
     SimpleOS_EnterCritical();
 
     //disable interrupts
-   __bic_SR_register(GIE);          //clear the GIE bit in SR
+//    __bic_SR_register(GIE);          //clear the GIE bit in SR
 
-    //configure linked list of task control blocks
-    Task[0].next = &Task[1];    // 0 points to 1
-    Task[1].next = &Task[0];    // 1 points to 2
-
-    //initialize the top elements of the stack and set the
-    //initial function pointer such that SP lands on it after
-    //initialization and/or context switch.
-
-    SimpleOS_initStack(0);
-    Task[0].stack[STACK_SIZE-5] = (int16_t)(functionPtr1);
-
-    SimpleOS_initStack(1);
-    Task[1].stack[STACK_SIZE-5] = (int16_t)(functionPtr2);
-
-    RunPt = &Task[0];
+    RunPt = Task_appendTask(functionPtr);
 
     SimpleOS_ExitCritical();
 }
+
+
+
+
+/////////////////////////////////////////////////
+//Scheduler
+//Called in the SimpleOS_ISR.  Configure the
+//RunPt to the next task to run.  Check that RunPt
+//is not at the end of the list, if so, reset it to the head.
+void SimpleOS_scheduler(void)
+{
+//    RunPt = RunPt;
+    //Update RunPt - check not at the end of the list
+    if ((RunPt->next) != NULL)
+        RunPt = RunPt->next;
+
+    else
+        RunPt = Task_getHead();     //reset to the head
+
+}
+
 
 /////////////////////////////////////////////
 //Start SimpleOS
@@ -263,6 +227,12 @@ SimpleOS_ISR(void)
     __asm("POP R13\n");
     __asm("POP R14\n");
     __asm("POP R15\n");
+
+
+    //NOTE: The timer counter is still counting
+    //regardless if interrupts are disabled. Reset
+    //the counter here
+    //__asm("MOV #0, &TA0R\n");
 
     //enable all the interrupts
     __bis_SR_register(GIE);
