@@ -1,6 +1,6 @@
 /*
  * 3/12/19
- * MSP430 - Simple OS
+ * MSP430 - SimpleOS
  * Dana Olcott - Dana's Boatshop.com
  *
  * The goal of this project is to create a super simple
@@ -14,6 +14,13 @@
  * - statically allocated array of task blocks with option to add as
  *   many as the memory allows.
  * - others, but not sure since the project is not completed.
+ *
+ * After going through this exercise, I found you can get about 4 tasks
+ * running with a 2ms timeslice.  This is using a 48-word task stack.  Since
+ * the main stack size is not defined, increasing the task stack size has
+ * strange effects.
+ *
+ * SimpleOS uses one time to run the scheduler.
  *
  */
 //includes
@@ -98,11 +105,9 @@ void GPIO_init(void)
     P2DIR |= BIT1;
     P2DIR |= BIT2;
 
-
     P2OUT &=~ BIT0;
     P2OUT &=~ BIT1;
     P2OUT &=~ BIT2;
-
 }
 
 /////////////////////////////////////////////////////
