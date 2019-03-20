@@ -4,7 +4,10 @@
  *  Created on: Mar 18, 2019
  *      Author: danao
  *
- *  Task controller file for use with SimpleOS.
+ *  Task controller file for use with SimpleOS
+ *  General approach:
+ *  Allocate array of task control blocks in initialization.
+ *  Append tasks as active as needed using a call to append task.
  */
 
 #include <stdio.h>
