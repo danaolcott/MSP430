@@ -19,8 +19,16 @@
 #include "SimpleOS.h"
 #include "Task.h"
 
+
+#define TAR_REG         (*(volatile int16_t*(0x0170)))
+
 //////////////////////////////////////////
 //Temporary storage - not required
+volatile int16_t* stackPtr1;
+volatile int16_t* stackPtr2;
+volatile int16_t* stackPtr3;
+volatile int16_t* gTimerACounterRegister = 0x0170;
+
 volatile uint16_t gStatusRegister = 0x00;        //enter/exit critical
 TaskStruct* RunPt;
 
@@ -179,6 +187,8 @@ SimpleOS_ISR(void)
 {
     __bic_SR_register(GIE);         //disable interrupts
 
+    __asm("MOV SP, &stackPtr1\n");  //save SP on entry
+
     //save R5 - R15 into the current RunPt stack
     __asm("PUSH R5\n");
     __asm("PUSH R6\n");
@@ -193,12 +203,16 @@ SimpleOS_ISR(void)
     __asm("PUSH R15\n");
 
     //Save the old stack pointer
+    __asm("MOV SP, &stackPtr2\n");          //save SP
     __asm("MOV  &RunPt, R4\n");             //set R4 = RunPt
+    __asm("MOV SP, @R4\n");                 //save SP into contents of R4, setting RunPt->sp = SP
 
     //update the new RunPt and set the new SP
     __asm("CALL #SimpleOS_scheduler\n");    //update RunPt by calling the scheduler
     __asm("MOV  &RunPt, R4\n");             //set R4 = RunPt
     __asm("MOV @R4, SP");                   //set contents of R4 (RunPt->sp) to SP.  ie, set SP to the new RunPt-sp
+    __asm("MOV SP, &stackPtr3\n");          //save the SP
+
 
     //update R5 - R15 with the contents of new RunPt stack.
     //ie, since SP = RunPt->sp, push / pop opperations
@@ -215,10 +229,9 @@ SimpleOS_ISR(void)
     __asm("POP R14\n");
     __asm("POP R15\n");
 
-
     //NOTE: The timer counter is still counting
-    //regardless if interrupts are disabled. This would
-    //be a good place to reset the counter if one wanted.
+    //regardless if interrupts are disabled. Reset
+    //the counter here
     //__asm("MOV #0, &TA0R\n");
 
     //enable all the interrupts
@@ -226,7 +239,6 @@ SimpleOS_ISR(void)
 
     //NOTE: The return from interrupt call is RETI
     __asm("RET\n");
-
 }
 
 
