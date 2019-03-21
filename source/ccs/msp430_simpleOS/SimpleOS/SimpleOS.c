@@ -23,6 +23,8 @@
 volatile uint16_t gStatusRegister = 0x00;        //enter/exit critical
 TaskStruct* RunPt;
 
+volatile uint32_t gTimerTick = 0x00;
+
 
 
 //////////////////////////////////////////////
@@ -67,6 +69,8 @@ void SimpleOS_addThread(void (*functionPtr)(void))
 //is not at the end of the list, if so, reset it to the head.
 void SimpleOS_scheduler(void)
 {
+    gTimerTick++;
+
 //    RunPt = RunPt;
     //Update RunPt - check not at the end of the list
     if ((RunPt->next) != NULL)
@@ -74,7 +78,6 @@ void SimpleOS_scheduler(void)
 
     else
         RunPt = Task_getHead();     //reset to the head
-
 }
 
 
@@ -228,5 +231,17 @@ SimpleOS_ISR(void)
     __asm("RET\n");
 }
 
+
+/////////////////////////////////////////
+//Delay as function of the timeslice.
+void SimpleOS_delay(uint32_t delay)
+{
+    volatile uint32_t temp = delay + gTimerTick;
+
+
+
+    while (temp > gTimerTick){};
+
+}
 
 

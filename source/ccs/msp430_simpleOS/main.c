@@ -209,12 +209,8 @@ void TaskFunction1(void)
 {
     while (1)
     {
-        if (!(counter1 % 2000))
-        {
-            LED_RED_TOGGLE();
-        }
-
-        counter1++;
+        LED_RED_TOGGLE();
+        SimpleOS_delay(100);
     }
 }
 
@@ -224,12 +220,8 @@ void TaskFunction2(void)
 {
     while (1)
     {
-        if (!(counter2 % 2000))
-        {
-            LED_GREEN_TOGGLE();
-        }
-
-        counter2++;
+        LED_GREEN_TOGGLE();
+        SimpleOS_delay(100);
     }
 }
 
@@ -241,12 +233,8 @@ void TaskFunction3(void)
 {
     while (1)
     {
-        if (!(counter3 % 2000))
-        {
-            P2OUT ^= BIT0;
-        }
-
-        counter3++;
+        P2OUT ^= BIT0;
+        SimpleOS_delay(100);
     }
 }
 
@@ -256,12 +244,8 @@ void TaskFunction4(void)
 {
     while (1)
     {
-        if (!(counter4 % 2000))
-        {
-            P2OUT ^= BIT1;
-        }
-
-        counter4++;
+        P2OUT ^= BIT1;
+        SimpleOS_delay(100);
     }
 }
 

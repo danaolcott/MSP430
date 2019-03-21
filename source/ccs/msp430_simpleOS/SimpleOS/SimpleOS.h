@@ -26,6 +26,7 @@ void SimpleOS_ISR(void);
 void SimpleOS_EnterCritical(void);
 void SimpleOS_ExitCritical(void);
 
+void SimpleOS_delay(uint32_t delay);
 
 
 
