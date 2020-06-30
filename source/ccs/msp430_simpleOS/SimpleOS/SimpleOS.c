@@ -245,3 +245,33 @@ void SimpleOS_delay(uint32_t delay)
 }
 
 
+//////////////////////////////////////////////
+//Spinlock semaphore wait.
+void SimpleOS_semaphoreWait(int16_t* signal)
+{
+    __bic_SR_register(GIE);         //disable
+
+    while ((*signal) < 1)
+    {
+        __bis_SR_register(GIE);     //enable
+        __bic_SR_register(GIE);     //disable
+    }
+
+    (*signal) = (*signal) - 1;
+    __bis_SR_register(GIE);         //enable
+}
+
+
+
+////////////////////////////////////////////////
+//Signal the semaphore
+void SimpleOS_semaphoreSignal(int16_t* signal)
+{
+    __bic_SR_register(GIE);         //disable
+    (*signal) = (*signal) + 1;
+    __bis_SR_register(GIE);         //enable
+}
+
+
+
+

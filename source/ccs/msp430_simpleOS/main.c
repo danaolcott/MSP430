@@ -58,6 +58,13 @@ volatile uint32_t counter2 = 0x00;
 volatile uint32_t counter3 = 0x00;
 volatile uint32_t counter4 = 0x00;
 
+////////////////////////////////////////////////
+//flags
+int16_t* task1Flag = 0;
+int16_t* task2Flag = 0;
+int16_t* task3Flag = 0;
+int16_t* task4Flag = 0;
+
 
 //main program
 int main(void)
@@ -210,6 +217,9 @@ void TaskFunction1(void)
     while (1)
     {
         LED_RED_TOGGLE();
+
+        //signal task 2
+        SimpleOS_semaphoreSignal(&task2Flag);
         SimpleOS_delay(100);
     }
 }
@@ -220,6 +230,7 @@ void TaskFunction2(void)
 {
     while (1)
     {
+        SimpleOS_semaphoreWait(task2Flag);
         LED_GREEN_TOGGLE();
         SimpleOS_delay(100);
     }
